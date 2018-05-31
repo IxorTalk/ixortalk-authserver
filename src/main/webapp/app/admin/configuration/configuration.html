@@ -1,0 +1,72 @@
+<!--
+
+    The MIT License (MIT)
+
+    Copyright (c) 2016-present IxorTalk CVBA
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+-->
+<div>
+    <h2 translate="configuration.title">Configuration</h2>
+
+    <span translate="configuration.filter">Filter (by prefix)</span> <input type="text" ng-model="filter" class="form-control">
+    <label ng-hide="filteredConfig.length == 0">Spring configuration</label>
+    <table class="table table-condensed table-striped table-bordered table-responsive"
+        style="table-layout:fixed" ng-hide="filteredConfig.length == 0">
+        <thead>
+        <tr>
+            <th ng-click="predicate = 'prefix'; reverse=!reverse" class="col-sm-4"><span translate="configuration.table.prefix">Prefix</span></th>
+            <th translate="configuration.table.properties" class="col-sm-8">Properties</th>
+        </tr>
+        </thead>
+
+        <tr ng-repeat="entry in filtered = (vm.configuration | filter:filter | orderBy:predicate:reverse)">
+            <td><span>{{entry.prefix}}</span></td>
+            <td>
+                <div class="row" ng-repeat="(key, value) in entry.properties">
+                    <div class="col-md-4">{{key}}</div>
+                    <div class="col-md-8">
+                        <span class="pull-right label label-default break">{{value}}</span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+    <div ng-repeat="(key, value) in vm.allConfiguration">
+        <label ng-hide="filtered.length == 0"><span>{{key}}</span></label>
+        <table class="table table-condensed table-striped table-bordered table-responsive"
+               style="table-layout:fixed" ng-hide="filtered.length == 0">
+            <thead>
+            <tr>
+                <th class="col-sm-4">Property</th>
+                <th class="col-sm-8">Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in filtered = (value | filter:filter)">
+                <td class="break">{{item.key}}</td>
+                <td class="break">
+                    <span class="pull-right label label-default break">{{item.val}}</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

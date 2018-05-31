@@ -1,0 +1,10 @@
+{
+    "home": {
+        "title": "IxorTalk Authentication Module",
+        "subtitle": "Configure users, roles and access to apps.",
+        "logged": {
+            "message": "You are logged in as user \"{{username}}\"."
+        }
+
+    }
+}

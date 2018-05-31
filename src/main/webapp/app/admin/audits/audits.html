@@ -1,0 +1,66 @@
+<!--
+
+    The MIT License (MIT)
+
+    Copyright (c) 2016-present IxorTalk CVBA
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+-->
+<div>
+    <h2 translate="audits.title">Audits</h2>
+
+    <div class="row">
+        <div class="col-md-5">
+            <h4 translate="audits.filter.title">Filter by date</h4>
+            <p class="input-group">
+                <span class="input-group-addon" translate="audits.filter.from">from</span>
+                <input type="date" class="input-sm form-control" name="start" ng-model="vm.fromDate" ng-change="vm.onChangeDate()" required/>
+                <span class="input-group-addon" translate="audits.filter.to">to</span>
+                <input type="date" class="input-sm form-control" name="end" ng-model="vm.toDate" ng-change="vm.onChangeDate()" required/>
+            </p>
+        </div>
+    </div>
+
+
+    <table class="table table-condensed table-striped table-bordered table-responsive">
+        <thead>
+        <tr>
+            <th ng-click="predicate = 'timestamp'; reverse=!reverse"><span translate="audits.table.header.date">Date</span></th>
+            <th ng-click="predicate = 'principal'; reverse=!reverse"><span translate="audits.table.header.principal">User</span></th>
+            <th ng-click="predicate = 'type'; reverse=!reverse"><span translate="audits.table.header.status">State</span></th>
+            <th ng-click="predicate = 'data.message'; reverse=!reverse"><span translate="audits.table.header.data">Extra data</span></th>
+        </tr>
+        </thead>
+
+        <tr ng-repeat="audit in vm.audits | filter:filter | orderBy:predicate:reverse" ng-hide="audit.filtered">
+            <td><span>{{audit.timestamp| date:'medium'}}</span></td>
+            <td><small>{{audit.principal}}</small></td>
+            <td>{{audit.type}}</td>
+            <td>
+                <span ng-show="audit.data.message">{{audit.data.message}}</span>
+                <span ng-show="audit.data.remoteAddress"><span translate="audits.table.data.remoteAddress">Remote Address</span> {{audit.data.remoteAddress}}</span>
+            </td>
+        </tr>
+    </table>
+
+    <div class="text-center">
+        <uib-pagination class="pagination-sm" total-items="vm.totalItems" ng-model="vm.page" ng-change="vm.loadPage(vm.page)"></uib-pagination>
+    </div>
+</div>

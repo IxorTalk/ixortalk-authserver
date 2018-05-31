@@ -1,0 +1,31 @@
+= OAuth 2.0
+:doctype: book
+:icons: font
+:toc: left
+:toclevels: 4
+:sectlinks:
+:source-highlighter: highlightjs
+
+== Token
+
+To access OAuth 2 secured API's, an access token needs to be retrieved from the auth server.
+
+=== Request
+
+Via curl:
+include::{snippets}/retrieveAccessToken/curl-request.adoc[]
+
+HTTP request:
+include::{snippets}/retrieveAccessToken/http-request.adoc[]
+
+==== Request Headers
+include::{snippets}/retrieveAccessToken/request-headers.adoc[]
+
+==== Request Parameters
+include::{snippets}/retrieveAccessToken/request-parameters.adoc[]
+
+=== Response
+
+include::{snippets}/retrieveAccessToken/http-response.adoc[]
+
+include::{snippets}/retrieveAccessToken/response-fields.adoc[]
