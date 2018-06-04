@@ -40,7 +40,7 @@
     <packaging>war</packaging>
     <name>ixortalk-authserver</name>
     <description>IxorTalk Auth Server (uaa)</description>
-    <url>https://github.com/ixortalkadmin/ixortalk-authserver/tree/master</url>
+    <url>https://github.com/ixortalk/ixortalk-authserver/tree/master</url>
 
     <prerequisites>
         <maven>3.0.0</maven>
@@ -81,7 +81,7 @@
     <scm>
         <connection>scm:git:git@github.com:ixortalkadmin/ixortalk-authserver.git</connection>
         <developerConnection>scm:git:git@github.com:ixortalkadmin/ixortalk-authserver.git</developerConnection>
-        <url>https://github.com/ixortalkadmin/ixortalk-authserver/tree/master</url>
+        <url>https://github.com/ixortalk/ixortalk-authserver/tree/master</url>
         <tag>HEAD</tag>
     </scm>
 
