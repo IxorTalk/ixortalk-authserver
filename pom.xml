@@ -79,8 +79,8 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:git@github.com:ixortalkadmin/ixortalk-authserver.git</connection>
-        <developerConnection>scm:git:git@github.com:ixortalkadmin/ixortalk-authserver.git</developerConnection>
+        <connection>scm:git:git@github.com:ixortalk/ixortalk-authserver.git</connection>
+        <developerConnection>scm:git:git@github.com:ixortalk/ixortalk-authserver.git</developerConnection>
         <url>https://github.com/ixortalk/ixortalk-authserver/tree/master</url>
         <tag>HEAD</tag>
     </scm>
