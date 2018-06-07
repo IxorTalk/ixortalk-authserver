@@ -953,6 +953,7 @@
                         <exclude>src/main/resources/public/assets/**</exclude>
                         <exclude>src/main/webapp/bower_components/**</exclude>
                         <exclude>node_modules/**</exclude>
+                        <exclude>node/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>
