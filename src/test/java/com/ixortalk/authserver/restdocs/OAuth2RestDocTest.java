@@ -23,34 +23,11 @@
  */
 package com.ixortalk.authserver.restdocs;
 
-import javax.inject.Inject;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ixortalk.authserver.AuthserverApp;
-import com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer;
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.specification.RequestSpecification;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.embedded.LocalServerPort;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.restdocs.JUnitRestDocumentation;
-import org.springframework.restdocs.restassured.operation.preprocess.UriModifyingOperationPreprocessor;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_ID_ADMIN;
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_SECRET_ADMIN;
 import static com.jayway.restassured.RestAssured.given;
-import static com.jayway.restassured.config.ObjectMapperConfig.objectMapperConfig;
-import static com.jayway.restassured.config.RestAssuredConfig.config;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
@@ -63,44 +40,8 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
-import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.restassured.operation.preprocess.RestAssuredPreprocessors.modifyUris;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = {AuthserverApp.class, OAuth2EmbeddedTestServer.class}, webEnvironment = RANDOM_PORT)
-@DirtiesContext(classMode = AFTER_CLASS)
-@ActiveProfiles("test")
-public class OAuth2RestDocTest {
-
-    @LocalServerPort
-    private int port;
-
-    @Value("${server.context-path}")
-    protected String contextPath;
-
-    @Rule
-    public JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation("target/generated-snippets");
-
-    protected RequestSpecification spec;
-
-    @Inject
-    protected ObjectMapper objectMapper;
-
-    @Before
-    public void initializeRestDocsSpec() {
-        RestAssured.port = port;
-        RestAssured.basePath = contextPath;
-        RestAssured.config = config().objectMapperConfig(objectMapperConfig().jackson2ObjectMapperFactory((cls, charset) -> objectMapper));
-
-        spec = new RequestSpecBuilder()
-            .addFilter(documentationConfiguration(this.restDocumentation))
-            .build();
-    }
-
-    protected static UriModifyingOperationPreprocessor staticUris() {
-        return modifyUris().scheme("https").host("instance.ixortalk.com").removePort();
-    }
+public class OAuth2RestDocTest extends AbstractRestDocTest {
 
     @Test
     public void retrievingAccessToken() {
@@ -128,8 +69,6 @@ public class OAuth2RestDocTest {
                         )
                 )
                 .when()
-                .post("/oauth/token")
-                .as(OAuth2AccessToken.class);
+                .post("/oauth/token");
     }
-
 }

@@ -23,68 +23,185 @@
  */
 package com.ixortalk.authserver.web.rest;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 
-import com.ixortalk.authserver.AuthserverApp;
+import com.ixortalk.authserver.domain.User;
 import com.ixortalk.authserver.repository.UserRepository;
-import com.ixortalk.authserver.service.UserService;
+import com.jayway.restassured.path.json.JsonPath;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.http.HttpHeaders;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static com.ixortalk.authserver.domain.UserTestBuilder.aUser;
+import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_ID_USER;
+import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
+import static com.ixortalk.test.oauth2.OAuth2TestTokens.userToken;
+import static com.ixortalk.test.util.Randomizer.nextString;
+import static com.jayway.restassured.RestAssured.given;
+import static com.jayway.restassured.http.ContentType.JSON;
+import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.net.HttpURLConnection.HTTP_OK;
+import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
-/**
- * Test class for the UserResource REST controller.
- *
- * @see UserResource
- */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = AuthserverApp.class)
-@WebAppConfiguration
-public class UserResourceIntTest {
+public class UserResourceIntTest extends AbstractSpringIntegrationTest {
+
+    public static final byte[] BINARY_CONTENT = nextString("binaryContent").getBytes();
+    public static final String PHOTO_CONTENT_TYPE = nextString("photocontent/type");
 
     @Inject
     private UserRepository userRepository;
 
-    @Inject
-    private UserService userService;
-
-    private MockMvc restUserMockMvc;
+    private User user;
 
     @Before
-    public void setup() {
-        UserResource userResource = new UserResource();
-        ReflectionTestUtils.setField(userResource, "userRepository", userRepository);
-        ReflectionTestUtils.setField(userResource, "userService", userService);
-        this.restUserMockMvc = MockMvcBuilders.standaloneSetup(userResource).build();
+    public void before() {
+        user = userRepository.save(aUser().build());
+    }
+
+    @After
+    public void after() {
+        userRepository.delete(user);
+        userRepository.findOneByLogin(CLIENT_ID_USER).ifPresent(user -> userRepository.delete(user));
     }
 
     @Test
-    public void testGetExistingUser() throws Exception {
-        restUserMockMvc.perform(get("/api/users/admin")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andExpect(jsonPath("$.lastName").value("Administrator"));
+    public void getUser_existing() {
+        JsonPath jsonPath =
+            given()
+                .auth().oauth2(adminToken().getValue())
+                .accept(JSON)
+                .when()
+                .get("/api/users/admin")
+                .then()
+                .statusCode(HTTP_OK)
+                .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE.toLowerCase())
+                .extract().jsonPath();
+
+        assertThat(jsonPath.getString("lastName")).isEqualTo("Administrator");
     }
 
     @Test
-    public void testGetUnknownUser() throws Exception {
-        restUserMockMvc.perform(get("/api/users/unknown")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+    public void getUser_unknown() {
+        given()
+            .auth().oauth2(adminToken().getValue())
+            .accept(JSON)
+            .when()
+            .get("/api/users/unknown")
+            .then()
+            .statusCode(HTTP_NOT_FOUND);
     }
 
+    @Test
+    public void getProfilePicture() {
+        mockGetFromS3(user.getProfilePictureKey(), BINARY_CONTENT, PHOTO_CONTENT_TYPE);
 
+        byte[] binaryResponse =
+            given()
+                .auth().preemptive().oauth2(adminToken().getValue())
+                .when()
+                .get("/api/users/{login}/profile-picture", user.getLogin())
+                .then()
+                .statusCode(HTTP_OK)
+                .header(CONTENT_TYPE, PHOTO_CONTENT_TYPE)
+                .extract().response().asByteArray();
+
+        assertThat(binaryResponse).isEqualTo(BINARY_CONTENT);
+    }
+
+    @Test
+    public void getProfilePicture_AsUser_FromOtherUser() {
+        mockGetFromS3(user.getProfilePictureKey(), BINARY_CONTENT, PHOTO_CONTENT_TYPE);
+
+        byte[] binaryResponse =
+            given()
+                .auth().preemptive().oauth2(userToken().getValue())
+                .when()
+                .get("/api/users/{login}/profile-picture", user.getLogin())
+                .then()
+                .statusCode(HTTP_OK)
+                .header(CONTENT_TYPE, PHOTO_CONTENT_TYPE)
+                .extract().response().asByteArray();
+
+        assertThat(binaryResponse).isEqualTo(BINARY_CONTENT);
+    }
+
+    @Test
+    public void getProfilePicture_notFound() {
+        given()
+            .auth().preemptive().oauth2(adminToken().getValue())
+            .when()
+            .get("/api/users/{login}/profile-picture", "nonExisting")
+            .then()
+            .statusCode(HTTP_NOT_FOUND);
+    }
+
+    @Test
+    public void getProfilePicture_noProfilePictureKey() {
+        doThrow(new IllegalArgumentException("Key cannot be null")).when(awsS3Template).get(null);
+
+        given()
+            .auth().preemptive().oauth2(adminToken().getValue())
+            .when()
+            .get("/api/users/{login}/profile-picture", user.getLogin())
+            .then()
+            .statusCode(HTTP_NOT_FOUND);
+    }
+
+    @Test
+    public void setProfilePicture_asAdmin() throws IOException {
+        mockPutInS3OnlyExpectingBytes(BINARY_CONTENT);
+
+        given()
+            .auth().preemptive().oauth2(adminToken().getValue())
+            .contentType(MULTIPART_FORM_DATA_VALUE)
+            .multiPart("file", "file", BINARY_CONTENT)
+            .when()
+            .post("/api/users/{login}/profile-picture", user.getLogin())
+            .then()
+            .statusCode(HTTP_OK);
+
+        verifySaveInS3(userRepository.findOneByLogin(user.getLogin()).map(User::getProfilePictureKey).orElseThrow(() -> new IllegalStateException("User " + user.getLogin() + " should exist at this point!")));
+
+    }
+
+    @Test
+    public void setProfilePicture_asUser_WithAccess() throws IOException {
+        user = userRepository.save(aUser().withLogin(CLIENT_ID_USER).build());
+
+        mockPutInS3OnlyExpectingBytes(BINARY_CONTENT);
+
+        given()
+            .auth().preemptive().oauth2(userToken().getValue())
+            .contentType(MULTIPART_FORM_DATA_VALUE)
+            .multiPart("file", "file", BINARY_CONTENT)
+            .when()
+            .post("/api/users/{login}/profile-picture", user.getLogin())
+            .then()
+            .statusCode(HTTP_OK);
+
+        verifySaveInS3(userRepository.findOneByLogin(user.getLogin()).map(User::getProfilePictureKey).orElseThrow(() -> new IllegalStateException("User " + user.getLogin() + " should exist at this point!")));
+    }
+
+    @Test
+    public void setProfilePicture_asUser_NoAccess() {
+        given()
+            .auth().preemptive().oauth2(userToken().getValue())
+            .contentType(MULTIPART_FORM_DATA_VALUE)
+            .multiPart("file", "file", BINARY_CONTENT)
+            .when()
+            .post("/api/users/{login}/profile-picture", user.getLogin())
+            .then()
+            .statusCode(HTTP_FORBIDDEN);
+
+        verifyZeroInteractions(awsS3Template);
+    }
 }

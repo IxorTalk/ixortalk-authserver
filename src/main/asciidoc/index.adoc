@@ -29,3 +29,62 @@ include::{snippets}/retrieveAccessToken/request-parameters.adoc[]
 include::{snippets}/retrieveAccessToken/http-response.adoc[]
 
 include::{snippets}/retrieveAccessToken/response-fields.adoc[]
+
+== Get Profile Picture
+
+GET call to retrieve the profile picture for a user
+
+=== Request
+
+Via curl:
+include::{snippets}/get-profile-picture/ok/curl-request.adoc[]
+
+HTTP request:
+include::{snippets}/get-profile-picture/ok/http-request.adoc[]
+
+==== Request Headers
+include::{snippets}/get-profile-picture/ok/request-headers.adoc[]
+
+==== Path Parameters
+include::{snippets}/get-profile-picture/ok/path-parameters.adoc[]
+
+=== Response
+
+Normal response:
+
+include::{snippets}/get-profile-picture/ok/http-response.adoc[]
+
+When no profile picture exists for the given user:
+
+include::{snippets}/get-profile-picture/not-found/http-response.adoc[]
+
+== Set Profile Picture
+
+POST call to upload the profile picture for a user
+
+=== Request
+
+Via curl:
+include::{snippets}/set-profile-picture/ok/curl-request.adoc[]
+
+HTTP request:
+include::{snippets}/set-profile-picture/ok/http-request.adoc[]
+
+==== Request Headers
+include::{snippets}/set-profile-picture/ok/request-headers.adoc[]
+
+==== Path Parameters
+include::{snippets}/set-profile-picture/ok/path-parameters.adoc[]
+
+==== Request Parts
+include::{snippets}/set-profile-picture/ok/request-parts.adoc[]
+
+=== Response
+
+Normal response:
+
+include::{snippets}/set-profile-picture/ok/http-response.adoc[]
+
+When the logged in user is not allowed to upload a new profile picture (should have `ROLE_ADMIN` or uploading its own profile picture):
+
+include::{snippets}/set-profile-picture/not-allowed/http-response.adoc[]

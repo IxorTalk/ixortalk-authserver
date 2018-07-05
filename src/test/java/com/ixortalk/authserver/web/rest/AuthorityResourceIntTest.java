@@ -34,7 +34,7 @@ import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
-public class AuthorityResourceIntTest extends AbstractRestAssuredIntTest {
+public class AuthorityResourceIntTest extends AbstractSpringIntegrationTest {
 
     @Test
     public void normalUsersCannotRetrieveAuthorities() throws Exception {
