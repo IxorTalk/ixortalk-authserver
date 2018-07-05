@@ -248,4 +248,12 @@
             <column name="lastModifiedAt" type="timestamp"/>
         </createTable>
     </changeSet>
+
+
+    <changeSet id="00000000000003" author="wjans">
+        <addColumn tableName="jhi_user">
+            <column name="profile_picture_key" type="varchar(36)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

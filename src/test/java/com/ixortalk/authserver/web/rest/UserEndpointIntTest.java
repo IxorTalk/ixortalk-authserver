@@ -33,7 +33,7 @@ import static com.jayway.restassured.http.ContentType.JSON;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class UserEndpointIntTest extends AbstractRestAssuredIntTest {
+public class UserEndpointIntTest extends AbstractSpringIntegrationTest {
 
     @Test
     public void getUser() throws Exception {

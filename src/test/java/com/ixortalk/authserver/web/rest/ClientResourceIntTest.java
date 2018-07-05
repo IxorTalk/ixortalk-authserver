@@ -46,7 +46,7 @@ import static java.net.HttpURLConnection.HTTP_OK;
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ClientResourceIntTest extends AbstractRestAssuredIntTest {
+public class ClientResourceIntTest extends AbstractSpringIntegrationTest {
 
     public static final String THE_NEW_CLIENTS_ID = "theNewClientsId";
     public static final Set<String> ROLES = newHashSet("ROLE_A", "ROLE_B");
