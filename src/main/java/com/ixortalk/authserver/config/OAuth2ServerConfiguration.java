@@ -86,8 +86,7 @@ public class OAuth2ServerConfiguration {
         private AuthenticationManager authenticationManager;
 
         @Override
-        public void configure(AuthorizationServerEndpointsConfigurer endpoints)
-            throws Exception {
+        public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
 
             endpoints
                 .tokenStore(tokenStore())
@@ -95,7 +94,7 @@ public class OAuth2ServerConfiguration {
         }
 
         @Override
-        public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
+        public void configure(AuthorizationServerSecurityConfigurer oauthServer) {
             oauthServer.allowFormAuthenticationForClients();
         }
 
@@ -110,16 +109,16 @@ public class OAuth2ServerConfiguration {
             }
             jHipsterProperties.getSecurity().getAuthentication().getOauthClients().values()
                 .stream()
-                .forEach(oauth ->
+                .forEach(client ->
                     clients
                         .and()
-                        .withClient(oauth.getClientid())
-                        .scopes("openid", "read", "write")
-                        .authorities(oauth.getAuthorities().toArray(new String[]{}))
-                        .authorizedGrantTypes("password", "refresh_token", "authorization_code", "implicit", "client_credentials")
-                        .autoApprove("openid", "read", "write")
-                        .secret(oauth.getSecret())
-                        .accessTokenValiditySeconds(oauth.getTokenValidityInSeconds())
+                        .withClient(client.getClientid())
+                        .scopes(client.getScopes().toArray(new String[]{}))
+                        .authorities(client.getAuthorities().toArray(new String[]{}))
+                        .authorizedGrantTypes(client.getAuthorizedGrantTypes().toArray(new String[]{}))
+                        .autoApprove(client.getAutoApproveScopes().toArray(new String[]{}))
+                        .secret(client.getSecret())
+                        .accessTokenValiditySeconds(client.getTokenValidityInSeconds())
                 );
         }
 
