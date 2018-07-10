@@ -24,11 +24,11 @@
 package com.ixortalk.authserver.config;
 
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.web.cors.CorsConfiguration;
-
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.web.cors.CorsConfiguration;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
@@ -215,6 +215,12 @@ public class JHipsterProperties {
 
                 private Set<String> authorities = newHashSet();
 
+                private Set<String> scopes = newHashSet("openid", "read", "write");
+
+                private Set<String> authorizedGrantTypes = newHashSet("password", "refresh_token", "authorization_code", "implicit", "client_credentials");
+
+                private Set<String> autoApproveScopes = newHashSet("openid", "read", "write");
+
                 public String getClientid() {
                     return clientid;
                 }
@@ -245,6 +251,30 @@ public class JHipsterProperties {
 
                 public void setAuthorities(Set<String> authorities) {
                     this.authorities = authorities;
+                }
+
+                public Set<String> getScopes() {
+                    return scopes;
+                }
+
+                public void setScopes(Set<String> scopes) {
+                    this.scopes = scopes;
+                }
+
+                public Set<String> getAuthorizedGrantTypes() {
+                    return authorizedGrantTypes;
+                }
+
+                public void setAuthorizedGrantTypes(Set<String> authorizedGrantTypes) {
+                    this.authorizedGrantTypes = authorizedGrantTypes;
+                }
+
+                public Set<String> getAutoApproveScopes() {
+                    return autoApproveScopes;
+                }
+
+                public void setAutoApproveScopes(Set<String> autoApproveScopes) {
+                    this.autoApproveScopes = autoApproveScopes;
                 }
             }
         }
