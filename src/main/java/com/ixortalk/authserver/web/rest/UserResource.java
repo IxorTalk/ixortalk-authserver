@@ -33,10 +33,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import com.amazonaws.services.s3.model.S3Object;
 import com.codahale.metrics.annotation.Timed;
 import com.ixortalk.authserver.config.Constants;
-import com.ixortalk.authserver.config.IxorTalkProperties;
 import com.ixortalk.authserver.domain.Authority;
 import com.ixortalk.authserver.domain.User;
 import com.ixortalk.authserver.repository.AuthorityRepository;
@@ -47,7 +45,6 @@ import com.ixortalk.authserver.service.UserService;
 import com.ixortalk.authserver.web.rest.dto.ManagedUserDTO;
 import com.ixortalk.authserver.web.rest.util.HeaderUtil;
 import com.ixortalk.authserver.web.rest.util.PaginationUtil;
-import com.ixortalk.aws.s3.library.config.AwsS3Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -57,22 +54,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
-import static com.amazonaws.util.IOUtils.toByteArray;
 import static java.util.Optional.ofNullable;
-import static org.springframework.http.MediaType.valueOf;
 import static org.springframework.http.ResponseEntity.badRequest;
-import static org.springframework.http.ResponseEntity.notFound;
-import static org.springframework.http.ResponseEntity.ok;
 
 /**
  * REST controller for managing users.
@@ -111,16 +101,10 @@ public class UserResource {
     private MailService mailService;
 
     @Inject
-    private IxorTalkProperties ixorTalkProperties;
-
-    @Inject
     private AuthorityRepository authorityRepository;
 
     @Inject
     private UserService userService;
-
-    @Inject
-    private AwsS3Template awsS3Template;
 
     /**
      * POST  /users  : Creates a new user.
@@ -298,44 +282,5 @@ public class UserResource {
         log.debug("REST request to delete User: {}", login);
         userService.deleteUserInformation(login);
         return ResponseEntity.ok().headers(HeaderUtil.createAlert( "userManagement.deleted", login)).build();
-    }
-
-    @RequestMapping(value = "/users/{login:" + Constants.LOGIN_REGEX + "}/profile-picture", method = RequestMethod.GET)
-    @Timed
-    public ResponseEntity<?> getProfilePicture(@PathVariable String login) {
-        log.debug("REST request to get User Profile Picture : {}", login);
-        return userService.getUserWithAuthoritiesByLogin(login)
-            .map(user -> {
-                try {
-                    S3Object s3Object = awsS3Template.get(user.getProfilePictureKey());
-                    return ok()
-                        .contentType(valueOf(s3Object.getObjectMetadata().getContentType()))
-                        .body(toByteArray(s3Object.getObjectContent()));
-                } catch (Exception e) {
-                    log.error("Error retrieving profile picture: " + e.getMessage(), e);
-                    return notFound().build();
-                }
-            })
-            .orElse(notFound().build());
-    }
-
-
-    @RequestMapping(value = "/users/{login:" + Constants.LOGIN_REGEX + "}/profile-picture", method = RequestMethod.POST)
-    @Timed
-    @PreAuthorize("hasRole('ROLE_ADMIN') or  T(org.apache.commons.lang.StringUtils).equalsIgnoreCase(#login, authentication.name)")
-    @Transactional
-    public ResponseEntity<?> postProfilePicture(@PathVariable String login, @RequestParam("file") MultipartFile uploadedFileRef) {
-        return userService.getUserWithAuthoritiesByLogin(login)
-            .map(User::generateProfilePictureKey)
-            .map(user -> {
-                try {
-                    awsS3Template.save(user.getProfilePictureKey(), uploadedFileRef);
-                } catch (Exception e) {
-                    log.error("Error setting profile picture: " + e.getMessage(), e);
-                    return notFound().build();
-                }
-                return ok().build();
-            })
-            .orElse(notFound().build());
     }
 }

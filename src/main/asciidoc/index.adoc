@@ -30,11 +30,15 @@ include::{snippets}/retrieveAccessToken/http-response.adoc[]
 
 include::{snippets}/retrieveAccessToken/response-fields.adoc[]
 
-== Get Profile Picture
+== Profile pictures
+
+Profile pictures are currently available as an optional feature.  The profile picture REST controller is conditional on the AwsS3Template autoconfiguration (see https://github.com/ixortalk/ixortalk-aws-s3-library).
+
+=== Get Profile Picture
 
 GET call to retrieve the profile picture for a user
 
-=== Request
+==== Request
 
 Via curl:
 include::{snippets}/get-profile-picture/ok/curl-request.adoc[]
@@ -42,13 +46,13 @@ include::{snippets}/get-profile-picture/ok/curl-request.adoc[]
 HTTP request:
 include::{snippets}/get-profile-picture/ok/http-request.adoc[]
 
-==== Request Headers
+===== Request Headers
 include::{snippets}/get-profile-picture/ok/request-headers.adoc[]
 
-==== Path Parameters
+===== Path Parameters
 include::{snippets}/get-profile-picture/ok/path-parameters.adoc[]
 
-=== Response
+==== Response
 
 Normal response:
 
@@ -58,11 +62,11 @@ When no profile picture exists for the given user:
 
 include::{snippets}/get-profile-picture/not-found/http-response.adoc[]
 
-== Set Profile Picture
+=== Set Profile Picture
 
 POST call to upload the profile picture for a user
 
-=== Request
+==== Request
 
 Via curl:
 include::{snippets}/set-profile-picture/ok/curl-request.adoc[]
@@ -70,16 +74,16 @@ include::{snippets}/set-profile-picture/ok/curl-request.adoc[]
 HTTP request:
 include::{snippets}/set-profile-picture/ok/http-request.adoc[]
 
-==== Request Headers
+===== Request Headers
 include::{snippets}/set-profile-picture/ok/request-headers.adoc[]
 
-==== Path Parameters
+===== Path Parameters
 include::{snippets}/set-profile-picture/ok/path-parameters.adoc[]
 
-==== Request Parts
+===== Request Parts
 include::{snippets}/set-profile-picture/ok/request-parts.adoc[]
 
-=== Response
+==== Response
 
 Normal response:
 

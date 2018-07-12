@@ -29,13 +29,16 @@ import javax.inject.Inject;
 
 import com.ixortalk.authserver.domain.User;
 import com.ixortalk.authserver.repository.UserRepository;
+import com.ixortalk.aws.s3.library.config.AwsS3Template;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
 
 import static com.ixortalk.authserver.domain.UserTestBuilder.aUser;
-import static com.ixortalk.authserver.web.rest.UserResourceIntTest.BINARY_CONTENT;
-import static com.ixortalk.authserver.web.rest.UserResourceIntTest.PHOTO_CONTENT_TYPE;
+import static com.ixortalk.authserver.web.rest.UserResourceProfilePictureIntTest.BINARY_CONTENT;
+import static com.ixortalk.authserver.web.rest.UserResourceProfilePictureIntTest.PHOTO_CONTENT_TYPE;
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_ID_USER;
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.userToken;
@@ -54,9 +57,13 @@ import static org.springframework.restdocs.request.RequestDocumentation.pathPara
 import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
 
-public class UserResourceRestDocTest extends AbstractRestDocTest {
+@TestPropertySource(properties = {"com.ixortalk.s3.default-bucket: default-bucket-test-config"})
+public class UserResourceProfilePictureRestDocTest extends AbstractRestDocTest {
 
     public static final String MULTIPART_PART_NAME = "file";
+
+    @MockBean
+    protected AwsS3Template awsS3Template;
 
     @Inject
     private UserRepository userRepository;
@@ -76,7 +83,7 @@ public class UserResourceRestDocTest extends AbstractRestDocTest {
 
     @Test
     public void getProfilePicture() {
-        mockGetFromS3(user.getProfilePictureKey(), BINARY_CONTENT, PHOTO_CONTENT_TYPE);
+        mockGetFromS3(awsS3Template, user.getProfilePictureKey(), BINARY_CONTENT, PHOTO_CONTENT_TYPE);
 
         given(this.spec)
             .auth().preemptive().oauth2(adminToken().getValue())
@@ -120,7 +127,7 @@ public class UserResourceRestDocTest extends AbstractRestDocTest {
     public void setProfilePicture_asUser_WithAccess() throws IOException {
         user = userRepository.save(aUser().withLogin(CLIENT_ID_USER).build());
 
-        mockPutInS3OnlyExpectingBytes(BINARY_CONTENT);
+        mockPutInS3OnlyExpectingBytes(awsS3Template, BINARY_CONTENT);
 
         given(this.spec)
             .auth().preemptive().oauth2(userToken().getValue())
