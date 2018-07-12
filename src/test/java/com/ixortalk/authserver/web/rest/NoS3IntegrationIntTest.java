@@ -23,44 +23,22 @@
  */
 package com.ixortalk.authserver.web.rest;
 
-import com.jayway.restassured.path.json.JsonPath;
+import java.net.HttpURLConnection;
+
 import org.junit.Test;
-import org.springframework.http.HttpHeaders;
 
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
 import static com.jayway.restassured.RestAssured.given;
-import static com.jayway.restassured.http.ContentType.JSON;
-import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
-import static java.net.HttpURLConnection.HTTP_OK;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
-public class UserResourceIntTest extends AbstractSpringIntegrationTest {
+public class NoS3IntegrationIntTest extends AbstractSpringIntegrationTest {
 
     @Test
-    public void getUser_existing() {
-        JsonPath jsonPath =
-            given()
-                .auth().oauth2(adminToken().getValue())
-                .accept(JSON)
-                .when()
-                .get("/api/users/admin")
-                .then()
-                .statusCode(HTTP_OK)
-                .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE.toLowerCase())
-                .extract().jsonPath();
-
-        assertThat(jsonPath.getString("lastName")).isEqualTo("Administrator");
-    }
-
-    @Test
-    public void getUser_unknown() {
+    public void profilePictureEndpointNotFound() {
         given()
-            .auth().oauth2(adminToken().getValue())
-            .accept(JSON)
+            .auth().preemptive().oauth2(adminToken().getValue())
             .when()
-            .get("/api/users/unknown")
+            .get("/api/users/{login}/profile-picture", "doesntMatter")
             .then()
-            .statusCode(HTTP_NOT_FOUND);
+            .statusCode(HttpURLConnection.HTTP_NOT_FOUND);
     }
 }

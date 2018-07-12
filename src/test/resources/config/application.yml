@@ -126,8 +126,3 @@ jhipster:
 
 defaultSuccessUrl: /../index.html
 loginPage: /login
-
-com:
-  ixortalk:
-    s3:
-      default-bucket: default-bucket-test-config

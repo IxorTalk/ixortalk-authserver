@@ -43,7 +43,6 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -78,11 +77,8 @@ public class AbstractSpringIntegrationTest {
     @Inject
     private ObjectMapper objectMapper;
 
-    @MockBean
-    protected AwsS3Template awsS3Template;
-
     @Mock(answer = RETURNS_DEEP_STUBS)
-    private S3Object s3Object;
+    protected S3Object s3Object;
 
     @Before
     public void setUpRestAssured() {
@@ -91,17 +87,13 @@ public class AbstractSpringIntegrationTest {
         RestAssured.config = config().objectMapperConfig(objectMapperConfig().jackson2ObjectMapperFactory((cls, charset) -> objectMapper));
     }
 
-    protected void mockGetFromS3(String key, byte[] bytes, String contentType) {
+    protected void mockGetFromS3(AwsS3Template awsS3Template, String key, byte[] bytes, String contentType) {
         when(awsS3Template.get(key)).thenReturn(s3Object);
-        mockS3Object(bytes, contentType);
-    }
-
-    private void mockS3Object(byte[] bytes, String contentType) {
         when(s3Object.getObjectContent()).thenReturn(new S3ObjectInputStream(new ByteArrayInputStream(bytes), null));
         when(s3Object.getObjectMetadata().getContentType()).thenReturn(contentType);
     }
 
-    protected void mockPutInS3OnlyExpectingBytes(byte[] expectedBytes) throws IOException {
+    protected void mockPutInS3OnlyExpectingBytes(AwsS3Template awsS3Template, byte[] expectedBytes) throws IOException {
         doThrow(new IllegalArgumentException("Not the expected bytes to save")).when(awsS3Template).save(any(), argThat(multipartFile -> bytesNotEqual(multipartFile, expectedBytes)));
     }
 
@@ -114,7 +106,7 @@ public class AbstractSpringIntegrationTest {
         }
     }
 
-    public void verifySaveInS3(String key) throws IOException {
+    public void verifySaveInS3(AwsS3Template awsS3Template, String key) throws IOException {
         ArgumentCaptor<String> profilePictureLinkCaptor = ArgumentCaptor.forClass(String.class);
         verify(awsS3Template).save(profilePictureLinkCaptor.capture(), shouldBeCheckedByWhenBecauseTempFileAlreadyDeletedAtTimeOfVerify());
         assertThat(profilePictureLinkCaptor.getValue()).isNotNull().isEqualTo(key);
