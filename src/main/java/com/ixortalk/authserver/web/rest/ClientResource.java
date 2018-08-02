@@ -36,6 +36,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,7 +46,9 @@ import static com.ixortalk.authserver.security.AuthoritiesConstants.ADMIN;
 import static com.ixortalk.authserver.service.util.RandomUtil.generatePassword;
 import static java.util.stream.Collectors.joining;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.ResponseEntity.noContent;
 import static org.springframework.http.ResponseEntity.ok;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
@@ -66,7 +69,7 @@ public class ClientResource {
 
     @RequestMapping(value = "/clients", method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Secured(ADMIN)
-    public ResponseEntity<ClientDetails> add(@RequestBody CreateClientDTO createClientDTO) throws URISyntaxException {
+    public ResponseEntity<ClientDetails> add(@RequestBody CreateClientDTO createClientDTO) {
         BaseClientDetails clientDetails = new BaseClientDetails(createClientDTO.getClientId(), null, SCOPES.stream().collect(joining(",")), "password,refresh_token,authorization_code,implicit,client_credentials", createClientDTO.getRoles());
         clientDetails.setClientSecret(generatePassword());
         clientDetails.setAccessTokenValiditySeconds(86400);
@@ -75,4 +78,10 @@ public class ClientResource {
         return ok(clientDetails);
     }
 
+    @RequestMapping(value = "/clients/{clientId}", method = DELETE)
+    @Secured(ADMIN)
+    public ResponseEntity<ClientDetails> delete(@PathVariable String clientId) {
+        jdbcClientDetailsService.removeClientDetails(clientId);
+        return noContent().build();
+    }
 }
