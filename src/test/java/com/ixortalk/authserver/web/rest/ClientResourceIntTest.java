@@ -28,6 +28,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 
+import com.ixortalk.test.util.Randomizer;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,9 +40,11 @@ import org.springframework.security.oauth2.provider.client.JdbcClientDetailsServ
 import static com.google.common.collect.Sets.newHashSet;
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.userToken;
+import static com.ixortalk.test.util.Randomizer.nextString;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.http.ContentType.JSON;
 import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
+import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -88,7 +91,7 @@ public class ClientResourceIntTest extends AbstractSpringIntegrationTest {
     }
 
     @Test
-    public void normalUsersCannotAddClients() throws Exception {
+    public void nonAdminUsersCannotAddClients() throws Exception {
         given()
             .auth().preemptive().oauth2(userToken().getValue())
             .accept(JSON)
@@ -104,5 +107,41 @@ public class ClientResourceIntTest extends AbstractSpringIntegrationTest {
             .post("/api/clients")
             .then()
             .statusCode(HTTP_FORBIDDEN);
+    }
+
+    @Test
+    public void deleteClient() {
+        ClientDetails oAuth2Client = setupOAuth2Client();
+        jdbcClientDetailsService.addClientDetails(oAuth2Client);
+
+        given()
+            .auth().preemptive().oauth2(adminToken().getValue())
+            .request()
+            .when()
+            .delete("/api/clients/{clientId}", oAuth2Client.getClientId())
+            .then()
+            .statusCode(HTTP_NO_CONTENT);
+
+        assertThat(jdbcClientDetailsService.listClientDetails().stream().noneMatch(clientDetails -> clientDetails.getClientId().equals(oAuth2Client.getClientId()))).isTrue();
+    }
+
+    @Test
+    public void nonAdminUsersCannotDeleteClients() {
+        ClientDetails oAuth2Client = setupOAuth2Client();
+        jdbcClientDetailsService.addClientDetails(oAuth2Client);
+
+        given()
+            .auth().preemptive().oauth2(userToken() .getValue())
+            .request()
+            .when()
+            .delete("/api/clients/{clientId}", oAuth2Client.getClientId())
+            .then()
+            .statusCode(HTTP_FORBIDDEN);
+
+        assertThat(jdbcClientDetailsService.loadClientByClientId(oAuth2Client.getClientId())).isNotNull();
+    }
+
+    private BaseClientDetails setupOAuth2Client() {
+        return new BaseClientDetails(nextString("oauth2ClientId-"), null, nextString("theScopes-"), nextString("theGrantTypes-"), nextString("theAuthorities-"));
     }
 }
