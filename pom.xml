@@ -155,7 +155,7 @@
         <prometheus.simpleclient.version>0.0.22</prometheus.simpleclient.version>
         <feign.version>8.18.0</feign.version>
         <dropwizard-metrics.version>3.2.5</dropwizard-metrics.version>
-        <ixortalk-test.version>1.0.0</ixortalk-test.version>
+        <ixortalk-test.version>1.0.2</ixortalk-test.version>
         <ixortalk-util.version>1.0.2</ixortalk-util.version>
         <ixortalk-aws-s3-library.version>1.0.1</ixortalk-aws-s3-library.version>
     </properties>

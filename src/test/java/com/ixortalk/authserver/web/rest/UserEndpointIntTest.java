@@ -23,11 +23,16 @@
  */
 package com.ixortalk.authserver.web.rest;
 
+import com.ixortalk.authserver.domain.User;
+import com.ixortalk.authserver.repository.UserRepository;
+import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.path.json.JsonPath;
 import org.junit.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_ID_ADMIN;
-import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
+import javax.inject.Inject;
+
+import static com.ixortalk.test.oauth2.OAuth2TestTokens.getPasswordGrantAccessToken;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.http.ContentType.JSON;
 import static java.net.HttpURLConnection.HTTP_OK;
@@ -35,11 +40,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class UserEndpointIntTest extends AbstractSpringIntegrationTest {
 
+    public static final String USER_ID = "user";
+
+    @Inject
+    private UserRepository userRepository;
+
     @Test
-    public void getUser() throws Exception {
+    public void getUser() {
         JsonPath jsonPath =
             given()
-                .auth().oauth2(adminToken().getValue())
+                .auth().oauth2(getPasswordGrantAccessToken(USER_ID, "user").getValue())
                 .accept(JSON)
                 .when()
                 .get("/user")
@@ -47,6 +57,44 @@ public class UserEndpointIntTest extends AbstractSpringIntegrationTest {
                 .statusCode(HTTP_OK)
                 .extract().jsonPath();
 
-        assertThat(jsonPath.getString("principal")).isEqualTo(CLIENT_ID_ADMIN);
+        assertThat(jsonPath.getString("name")).isEqualTo(USER_ID);
+    }
+
+    @Test
+    public void getUser_noProfilePictureKey() {
+        User user = userRepository.findOneByLogin(USER_ID).get();
+        ReflectionTestUtils.setField(user, "profilePictureKey", null);
+        userRepository.save(user);
+
+        JsonPath jsonPath =
+            given()
+                .auth().oauth2(getPasswordGrantAccessToken(USER_ID, "user").getValue())
+                .accept(JSON)
+                .when()
+                .get("/user")
+                .then()
+                .statusCode(HTTP_OK)
+                .extract().jsonPath();
+
+        assertThat(jsonPath.getString("userInfo.profilePictureUrl")).isNull();
+    }
+
+    @Test
+    public void getUser_withProfilePictureKey() {
+        User user = userRepository.findOneByLogin(USER_ID).get();
+        user.generateProfilePictureKey();
+        userRepository.save(user);
+
+        JsonPath jsonPath =
+            given()
+                .auth().oauth2(getPasswordGrantAccessToken(USER_ID, "user").getValue())
+                .accept(JSON)
+                .when()
+                .get("/user")
+                .then()
+                .statusCode(HTTP_OK)
+                .extract().jsonPath();
+
+        assertThat(jsonPath.getString("userInfo.profilePictureUrl")).isEqualTo("http://localhost:" + RestAssured.port + RestAssured.basePath + "/api/profile-pictures/" + user.getProfilePictureKey());
     }
 }
