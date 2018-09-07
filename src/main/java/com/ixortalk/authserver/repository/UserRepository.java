@@ -24,11 +24,9 @@
 package com.ixortalk.authserver.repository;
 
 import com.ixortalk.authserver.domain.User;
-
-import java.time.ZonedDateTime;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,6 +44,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findOneByEmail(String email);
 
     Optional<User> findOneByLogin(String login);
+
+    Optional<User> findOneByProfilePictureKey(String profilePictureKey);
 
     Optional<User> findOneById(Long userId);
 

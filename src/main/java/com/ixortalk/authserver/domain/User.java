@@ -23,28 +23,19 @@
  */
 package com.ixortalk.authserver.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ixortalk.authserver.config.Constants;
+import org.hibernate.validator.constraints.Email;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.ixortalk.authserver.config.Constants;
-import org.hibernate.validator.constraints.Email;
 
 import static java.util.UUID.randomUUID;
 
@@ -220,9 +211,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
     }
 
     public User generateProfilePictureKey() {
-        if (this.profilePictureKey == null) {
-            this.profilePictureKey = randomUUID().toString();
-        }
+        this.profilePictureKey = randomUUID().toString();
         return this;
     }
 
