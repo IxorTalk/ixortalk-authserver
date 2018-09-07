@@ -34,33 +34,61 @@ include::{snippets}/retrieveAccessToken/response-fields.adoc[]
 
 Profile pictures are currently available as an optional feature.  The profile picture REST controller is conditional on the AwsS3Template autoconfiguration (see https://github.com/ixortalk/ixortalk-aws-s3-library).
 
-=== Get Profile Picture
+=== Get Profile Picture by Login
 
-GET call to retrieve the profile picture for a user
+GET call to retrieve the profile picture for a user by it's login
 
 ==== Request
 
 Via curl:
-include::{snippets}/get-profile-picture/ok/curl-request.adoc[]
+include::{snippets}/get-profile-picture-by-login/ok/curl-request.adoc[]
 
 HTTP request:
-include::{snippets}/get-profile-picture/ok/http-request.adoc[]
+include::{snippets}/get-profile-picture-by-login/ok/http-request.adoc[]
 
 ===== Request Headers
-include::{snippets}/get-profile-picture/ok/request-headers.adoc[]
+include::{snippets}/get-profile-picture-by-login/ok/request-headers.adoc[]
 
 ===== Path Parameters
-include::{snippets}/get-profile-picture/ok/path-parameters.adoc[]
+include::{snippets}/get-profile-picture-by-login/ok/path-parameters.adoc[]
 
 ==== Response
 
 Normal response:
 
-include::{snippets}/get-profile-picture/ok/http-response.adoc[]
+include::{snippets}/get-profile-picture-by-login/ok/http-response.adoc[]
 
 When no profile picture exists for the given user:
 
-include::{snippets}/get-profile-picture/not-found/http-response.adoc[]
+include::{snippets}/get-profile-picture-by-login/not-found/http-response.adoc[]
+
+=== Get Profile Picture by Profile Picture Key
+
+GET call to retrieve the profile picture for a user by key.  This key is a unique identifier for a specific version of the profile picture.  It can be retrieved via the me call (`/user`).
+
+==== Request
+
+Via curl:
+include::{snippets}/get-profile-picture-by-key/ok/curl-request.adoc[]
+
+HTTP request:
+include::{snippets}/get-profile-picture-by-key/ok/http-request.adoc[]
+
+===== Request Headers
+include::{snippets}/get-profile-picture-by-key/ok/request-headers.adoc[]
+
+===== Path Parameters
+include::{snippets}/get-profile-picture-by-key/ok/path-parameters.adoc[]
+
+==== Response
+
+Normal response:
+
+include::{snippets}/get-profile-picture-by-key/ok/http-response.adoc[]
+
+When no profile picture exists for the given user:
+
+include::{snippets}/get-profile-picture-by-key/not-found/http-response.adoc[]
 
 === Set Profile Picture
 

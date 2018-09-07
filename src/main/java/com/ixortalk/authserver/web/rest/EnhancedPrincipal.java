@@ -23,24 +23,24 @@
  */
 package com.ixortalk.authserver.web.rest;
 
-import java.security.Principal;
-
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.ixortalk.authserver.web.rest.dto.ManagedUserDTO;
+
+import java.security.Principal;
 
 public class EnhancedPrincipal {
 
     private Principal principal;
 
-    private ManagedUserDTO userInfo;
+    private UserInfo userInfo;
 
-    private EnhancedPrincipal(Principal principal, ManagedUserDTO userInfo) {
+    private EnhancedPrincipal(Principal principal, UserInfo userInfo) {
         this.principal = principal;
         this.userInfo = userInfo;
     }
 
-    public static EnhancedPrincipal enhancedPrincipal(Principal principal, ManagedUserDTO managedUserDTO) {
-        return new EnhancedPrincipal(principal, managedUserDTO);
+    public static EnhancedPrincipal enhancedPrincipal(Principal principal, ManagedUserDTO managedUserDTO, String profilePictureUrl) {
+        return new EnhancedPrincipal(principal, new UserInfo(managedUserDTO, profilePictureUrl));
     }
 
     @JsonUnwrapped
@@ -48,7 +48,27 @@ public class EnhancedPrincipal {
         return principal;
     }
 
-    public ManagedUserDTO getUserInfo() {
+    public UserInfo getUserInfo() {
         return userInfo;
+    }
+}
+
+class UserInfo {
+
+    private ManagedUserDTO managedUserDTO;
+    private String profilePictureUrl;
+
+    public UserInfo(ManagedUserDTO managedUserDTO, String profilePictureUrl) {
+        this.managedUserDTO = managedUserDTO;
+        this.profilePictureUrl = profilePictureUrl;
+    }
+
+    @JsonUnwrapped
+    public ManagedUserDTO getManagedUserDTO() {
+        return managedUserDTO;
+    }
+
+    public String getProfilePictureUrl() {
+        return profilePictureUrl;
     }
 }

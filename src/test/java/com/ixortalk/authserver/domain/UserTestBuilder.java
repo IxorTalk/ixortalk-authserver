@@ -29,6 +29,7 @@ import java.util.Set;
 import static com.google.common.base.Strings.padStart;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.ixortalk.test.util.Randomizer.nextString;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 public class UserTestBuilder {
 
@@ -43,6 +44,7 @@ public class UserTestBuilder {
     private String resetKey;
     private ZonedDateTime resetDate = null;
     private Set<Authority> authorities = newHashSet();
+    private String profilePictureKey = null;
 
     private UserTestBuilder() {}
 
@@ -63,6 +65,7 @@ public class UserTestBuilder {
         user.setResetKey(resetKey);
         user.setResetDate(resetDate);
         user.setAuthorities(authorities);
+        setField(user, "profilePictureKey", profilePictureKey);
         return user;
     }
 
@@ -118,6 +121,11 @@ public class UserTestBuilder {
 
     public UserTestBuilder withAuthorities(Set<Authority> authorities) {
         this.authorities = authorities;
+        return this;
+    }
+
+    public UserTestBuilder withProfilePictureKey(String profilePictureKey) {
+        this.profilePictureKey = profilePictureKey;
         return this;
     }
 }

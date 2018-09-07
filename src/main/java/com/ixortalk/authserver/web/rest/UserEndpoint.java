@@ -23,16 +23,19 @@
  */
 package com.ixortalk.authserver.web.rest;
 
-import java.security.Principal;
-
-import javax.inject.Inject;
-
+import com.ixortalk.authserver.domain.User;
 import com.ixortalk.authserver.service.UserService;
 import com.ixortalk.authserver.web.rest.dto.ManagedUserDTO;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
+import java.util.Optional;
+
 import static com.ixortalk.authserver.web.rest.EnhancedPrincipal.enhancedPrincipal;
+import static java.util.Optional.ofNullable;
 
 @RestController
 public class UserEndpoint {
@@ -40,13 +43,16 @@ public class UserEndpoint {
     @Inject
     private UserService userService;
 
+    @Inject
+    private ConstructBaseUrlService constructBaseUrlService;
+
     @RequestMapping("/user")
-    public EnhancedPrincipal user(Principal user) {
+    public EnhancedPrincipal user(Principal principal, HttpServletRequest request) {
+        Optional<User> userOptional = userService.getUserWithAuthoritiesByLogin(principal.getName());
         return enhancedPrincipal(
-            user,
-            userService.getUserWithAuthoritiesByLogin(user.getName())
-                .map(ManagedUserDTO::new)
-                .orElse(null));
+            principal,
+            userOptional.map(ManagedUserDTO::new).orElse(null),
+            userOptional.flatMap(user -> ofNullable(user.getProfilePictureKey())).map(profilePictureKey -> constructBaseUrlService.constructBaseUrl(request) + "/api/profile-pictures/" + profilePictureKey).orElse(null));
     }
 }
 

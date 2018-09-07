@@ -23,13 +23,11 @@
  */
 package com.ixortalk.authserver.web.rest;
 
-import javax.inject.Inject;
-
 import com.amazonaws.services.s3.model.S3Object;
 import com.codahale.metrics.annotation.Timed;
 import com.ixortalk.authserver.config.Constants;
 import com.ixortalk.authserver.domain.User;
-import com.ixortalk.authserver.service.UserService;
+import com.ixortalk.authserver.repository.UserRepository;
 import com.ixortalk.aws.s3.library.config.AwsS3Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,12 +35,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.inject.Inject;
+
+import java.util.Optional;
 
 import static com.amazonaws.util.IOUtils.toByteArray;
 import static org.springframework.http.MediaType.valueOf;
@@ -81,16 +79,27 @@ public class UserProfilePictureResource {
     private final Logger log = LoggerFactory.getLogger(UserProfilePictureResource.class);
 
     @Inject
-    private UserService userService;
+    private UserRepository userRepository;
 
     @Inject
     private AwsS3Template awsS3Template;
 
     @RequestMapping(value = "/users/{login:" + Constants.LOGIN_REGEX + "}/profile-picture", method = RequestMethod.GET)
     @Timed
-    public ResponseEntity<?> getProfilePicture(@PathVariable String login) {
-        log.debug("REST request to get User Profile Picture : {}", login);
-        return userService.getUserWithAuthoritiesByLogin(login)
+    public ResponseEntity<?> getProfilePictureByLogin(@PathVariable String login) {
+        log.debug("REST request to get User Profile Picture by login : {}", login);
+        return getProfilePicture(userRepository.findOneByLogin(login));
+    }
+
+    @RequestMapping(value = "/profile-pictures/{profilePictureKey}", method = RequestMethod.GET)
+    @Timed
+    public ResponseEntity<?> getProfilePictureByKey(@PathVariable String profilePictureKey) {
+        log.debug("REST request to get User Profile Picture by key : {}", profilePictureKey);
+        return getProfilePicture(userRepository.findOneByProfilePictureKey(profilePictureKey));
+    }
+
+    private ResponseEntity<?> getProfilePicture(Optional<User> optionalUser) {
+        return optionalUser
             .map(user -> {
                 try {
                     S3Object s3Object = awsS3Template.get(user.getProfilePictureKey());
@@ -111,7 +120,7 @@ public class UserProfilePictureResource {
     @PreAuthorize("hasRole('ROLE_ADMIN') or  T(org.apache.commons.lang.StringUtils).equalsIgnoreCase(#login, authentication.name)")
     @Transactional
     public ResponseEntity<?> postProfilePicture(@PathVariable String login, @RequestParam("file") MultipartFile uploadedFileRef) {
-        return userService.getUserWithAuthoritiesByLogin(login)
+        return userRepository.findOneByLogin(login)
             .map(User::generateProfilePictureKey)
             .map(user -> {
                 try {
