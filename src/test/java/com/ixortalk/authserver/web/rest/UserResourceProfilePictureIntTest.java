@@ -42,7 +42,6 @@ import static com.ixortalk.test.oauth2.OAuth2TestTokens.userToken;
 import static com.ixortalk.test.util.Randomizer.nextString;
 import static com.jayway.restassured.RestAssured.given;
 import static java.net.HttpURLConnection.*;
-import static java.util.stream.Collectors.toList;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doThrow;
@@ -74,8 +73,6 @@ public class UserResourceProfilePictureIntTest extends AbstractSpringIntegration
     public void after() {
         userRepository.delete(user);
         userRepository.findOneByLogin(CLIENT_ID_USER.toLowerCase()).ifPresent(user -> userRepository.delete(user));
-
-        System.out.println("users = " + userRepository.findAll().stream().map(User::getLogin).collect(toList()));
     }
 
     @Test
@@ -143,24 +140,6 @@ public class UserResourceProfilePictureIntTest extends AbstractSpringIntegration
 
         byte[] binaryResponse =
             given()
-                .auth().preemptive().oauth2(adminToken().getValue())
-                .when()
-                .get("/api/profile-pictures/{profilePictureKey}", INITIAL_PROFILE_PICTURE_KEY)
-                .then()
-                .statusCode(HTTP_OK)
-                .header(CONTENT_TYPE, PHOTO_CONTENT_TYPE)
-                .extract().response().asByteArray();
-
-        assertThat(binaryResponse).isEqualTo(BINARY_CONTENT);
-    }
-
-    @Test
-    public void getProfilePictureByKey_AsUser_FromOtherUser() {
-        mockGetFromS3(awsS3Template, INITIAL_PROFILE_PICTURE_KEY, BINARY_CONTENT, PHOTO_CONTENT_TYPE);
-
-        byte[] binaryResponse =
-            given()
-                .auth().preemptive().oauth2(userToken().getValue())
                 .when()
                 .get("/api/profile-pictures/{profilePictureKey}", INITIAL_PROFILE_PICTURE_KEY)
                 .then()
