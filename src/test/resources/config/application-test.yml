@@ -24,3 +24,17 @@
 
 server:
   context-path: /uaa
+
+ixortalk:
+
+  server:
+    authserver:
+        context-path: ${server.context-path}
+
+  loadbalancer:
+      external:
+          url: ${ixortalk.loadbalancer.external.protocol}://${ixortalk.loadbalancer.external.host}:${ixortalk.loadbalancer.external.port}
+          host: localhost
+          protocol: https
+          port: 443
+

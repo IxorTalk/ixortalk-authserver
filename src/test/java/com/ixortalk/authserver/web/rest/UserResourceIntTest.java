@@ -23,9 +23,15 @@
  */
 package com.ixortalk.authserver.web.rest;
 
+import com.ixortalk.authserver.config.IxorTalkProperties;
+import com.ixortalk.authserver.domain.User;
+import com.ixortalk.authserver.repository.UserRepository;
 import com.jayway.restassured.path.json.JsonPath;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import javax.inject.Inject;
 
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
 import static com.jayway.restassured.RestAssured.given;
@@ -36,6 +42,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
 public class UserResourceIntTest extends AbstractSpringIntegrationTest {
+
+    public static final String USER_ID = "user";
+
+    @Inject
+    private UserRepository userRepository;
+
+    @Inject
+    private IxorTalkProperties ixorTalkProperties;
 
     @Test
     public void getUser_existing() {
@@ -62,5 +76,43 @@ public class UserResourceIntTest extends AbstractSpringIntegrationTest {
             .get("/api/users/unknown")
             .then()
             .statusCode(HTTP_NOT_FOUND);
+    }
+
+    @Test
+    public void getUser_noProfilePictureKey() {
+        User user = userRepository.findOneByLogin(USER_ID).get();
+        ReflectionTestUtils.setField(user, "profilePictureKey", null);
+        userRepository.save(user);
+
+        JsonPath jsonPath =
+            given()
+                .auth().oauth2(adminToken().getValue())
+                .accept(JSON)
+                .when()
+                .get("/api/users/" + USER_ID)
+                .then()
+                .statusCode(HTTP_OK)
+                .extract().jsonPath();
+
+        assertThat(jsonPath.getString("profilePictureUrl")).isNull();
+    }
+
+    @Test
+    public void getUser_withProfilePictureKey() {
+        User user = userRepository.findOneByLogin(USER_ID).get();
+        user.generateProfilePictureKey();
+        userRepository.save(user);
+
+        JsonPath jsonPath =
+            given()
+                .auth().oauth2(adminToken().getValue())
+                .accept(JSON)
+                .when()
+                .get("/api/users/" + USER_ID)
+                .then()
+                .statusCode(HTTP_OK)
+                .extract().jsonPath();
+
+        assertThat(jsonPath.getString("profilePictureUrl")).isEqualTo(ixorTalkProperties.getLoadbalancer().getExternal().getUrlWithoutStandardPorts() + ixorTalkProperties.getMicroservice("authserver").getContextPath() + "/api/profile-pictures/" + user.getProfilePictureKey());
     }
 }

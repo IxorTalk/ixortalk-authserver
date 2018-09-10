@@ -35,7 +35,6 @@ import java.security.Principal;
 import java.util.Optional;
 
 import static com.ixortalk.authserver.web.rest.EnhancedPrincipal.enhancedPrincipal;
-import static java.util.Optional.ofNullable;
 
 @RestController
 public class UserEndpoint {
@@ -43,16 +42,15 @@ public class UserEndpoint {
     @Inject
     private UserService userService;
 
-    @Inject
-    private ConstructBaseUrlService constructBaseUrlService;
-
     @RequestMapping("/user")
     public EnhancedPrincipal user(Principal principal, HttpServletRequest request) {
         Optional<User> userOptional = userService.getUserWithAuthoritiesByLogin(principal.getName());
         return enhancedPrincipal(
             principal,
-            userOptional.map(ManagedUserDTO::new).orElse(null),
-            userOptional.flatMap(user -> ofNullable(user.getProfilePictureKey())).map(profilePictureKey -> constructBaseUrlService.constructBaseUrl(request) + "/api/profile-pictures/" + profilePictureKey).orElse(null));
+            userOptional
+                .map(user -> new ManagedUserDTO(user, userService.constructProfilePictureUrl(user)))
+                .orElse(null)
+            );
     }
 }
 

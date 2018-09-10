@@ -32,15 +32,15 @@ public class EnhancedPrincipal {
 
     private Principal principal;
 
-    private UserInfo userInfo;
+    private ManagedUserDTO userInfo;
 
-    private EnhancedPrincipal(Principal principal, UserInfo userInfo) {
+    private EnhancedPrincipal(Principal principal, ManagedUserDTO userInfo) {
         this.principal = principal;
         this.userInfo = userInfo;
     }
 
-    public static EnhancedPrincipal enhancedPrincipal(Principal principal, ManagedUserDTO managedUserDTO, String profilePictureUrl) {
-        return new EnhancedPrincipal(principal, new UserInfo(managedUserDTO, profilePictureUrl));
+    public static EnhancedPrincipal enhancedPrincipal(Principal principal, ManagedUserDTO managedUserDTO) {
+        return new EnhancedPrincipal(principal, managedUserDTO);
     }
 
     @JsonUnwrapped
@@ -48,27 +48,7 @@ public class EnhancedPrincipal {
         return principal;
     }
 
-    public UserInfo getUserInfo() {
+    public ManagedUserDTO getUserInfo() {
         return userInfo;
-    }
-}
-
-class UserInfo {
-
-    private ManagedUserDTO managedUserDTO;
-    private String profilePictureUrl;
-
-    public UserInfo(ManagedUserDTO managedUserDTO, String profilePictureUrl) {
-        this.managedUserDTO = managedUserDTO;
-        this.profilePictureUrl = profilePictureUrl;
-    }
-
-    @JsonUnwrapped
-    public ManagedUserDTO getManagedUserDTO() {
-        return managedUserDTO;
-    }
-
-    public String getProfilePictureUrl() {
-        return profilePictureUrl;
     }
 }

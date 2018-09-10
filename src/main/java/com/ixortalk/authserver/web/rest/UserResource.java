@@ -23,16 +23,6 @@
  */
 package com.ixortalk.authserver.web.rest;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-
 import com.codahale.metrics.annotation.Timed;
 import com.ixortalk.authserver.config.Constants;
 import com.ixortalk.authserver.domain.Authority;
@@ -55,11 +45,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.springframework.http.ResponseEntity.badRequest;
@@ -115,7 +110,6 @@ public class UserResource {
      * </p>
      *
      * @param managedUserDTO the user to create
-     * @param request the HTTP request
      * @return the ResponseEntity with status 201 (Created) and with body the new user, or with status 400 (Bad Request) if the login or email is already in use
      * @throws URISyntaxException if the Location URI syntaxt is incorrect
      */
@@ -124,7 +118,7 @@ public class UserResource {
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @Secured(AuthoritiesConstants.ADMIN)
-    public ResponseEntity<?> createUser(@RequestBody ManagedUserDTO managedUserDTO, HttpServletRequest request) throws URISyntaxException {
+    public ResponseEntity<?> createUser(@RequestBody ManagedUserDTO managedUserDTO) throws URISyntaxException {
         log.debug("REST request to save User : {}", managedUserDTO);
 
         //Lowercase the user login before comparing with database
@@ -138,7 +132,7 @@ public class UserResource {
                 .body(null);
         } else {
             User newUser = userService.createUser(managedUserDTO);
-            mailService.sendCreationEmail(newUser, ofNullable(managedUserDTO.getEmailActivationBaseUrl()), request);
+            mailService.sendCreationEmail(newUser, ofNullable(managedUserDTO.getEmailActivationBaseUrl()));
             return ResponseEntity.created(new URI("/api/users/" + newUser.getLogin()))
                 .headers(HeaderUtil.createAlert( "userManagement.created", newUser.getLogin()))
                 .body(newUser);
@@ -185,8 +179,7 @@ public class UserResource {
                 );
                 return ResponseEntity.ok()
                     .headers(HeaderUtil.createAlert("userManagement.updated", managedUserDTO.getLogin()))
-                    .body(new ManagedUserDTO(userRepository
-                        .findOne(managedUserDTO.getId())));
+                    .body(new ManagedUserDTO(userRepository.findOne(managedUserDTO.getId()), userService.constructProfilePictureUrl(user)));
             })
             .orElseGet(() -> new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
     }
@@ -222,7 +215,7 @@ public class UserResource {
                     managedUserDTO.setId(user.getId());
                     return updateUser(managedUserDTO);
                 })
-                .orElse((ResponseEntity<ManagedUserDTO>) createUser(managedUserDTO, request));
+                .orElse((ResponseEntity<ManagedUserDTO>) createUser(managedUserDTO));
     }
 
     /**
@@ -242,7 +235,7 @@ public class UserResource {
         throws URISyntaxException {
         Page<User> page = userRepository.findAll(pageable);
         List<ManagedUserDTO> managedUserDTOs = page.getContent().stream()
-            .map(ManagedUserDTO::new)
+            .map(user -> new ManagedUserDTO(user, userService.constructProfilePictureUrl(user)))
             .collect(Collectors.toList());
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/users");
         return new ResponseEntity<>(managedUserDTOs, headers, HttpStatus.OK);
@@ -262,7 +255,7 @@ public class UserResource {
     public ResponseEntity<ManagedUserDTO> getUser(@PathVariable String login) {
         log.debug("REST request to get User : {}", login);
         return userService.getUserWithAuthoritiesByLogin(login)
-                .map(ManagedUserDTO::new)
+                .map(user -> new ManagedUserDTO(user, userService.constructProfilePictureUrl(user)))
                 .map(managedUserDTO -> new ResponseEntity<>(managedUserDTO, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }

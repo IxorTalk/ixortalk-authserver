@@ -33,7 +33,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.Optional;
 
@@ -54,12 +53,12 @@ public class MailService {
     private ConstructBaseUrlService constructBaseUrlService;
 
     @Async
-    public void sendActivationEmail(User user, Optional<String> specifiedBaseUrl, HttpServletRequest request) {
+    public void sendActivationEmail(User user, Optional<String> specifiedBaseUrl) {
         log.debug("Sending activation e-mail to '{}'", user.getEmail());
 
         Map<String, Object> additionalVariables = newHashMap();
         additionalVariables.put(USER, user);
-        additionalVariables.put(BASE_URL, specifiedBaseUrl.orElse(constructBaseUrlService.constructBaseUrl(request)));
+        additionalVariables.put(BASE_URL, specifiedBaseUrl.orElse(constructBaseUrlService.constructBaseUrl()));
 
         mailingService.send(new SendMailVO(
             user.getEmail(),
@@ -71,12 +70,12 @@ public class MailService {
     }
 
     @Async
-    public void sendCreationEmail(User user, Optional<String> specifiedBaseUrl, HttpServletRequest request) {
+    public void sendCreationEmail(User user, Optional<String> specifiedBaseUrl) {
         log.debug("Sending creation e-mail to '{}'", user.getEmail());
 
         Map<String, Object> additionalVariables = newHashMap();
         additionalVariables.put(USER, user);
-        additionalVariables.put(BASE_URL, specifiedBaseUrl.orElse(constructBaseUrlService.constructBaseUrl(request)));
+        additionalVariables.put(BASE_URL, specifiedBaseUrl.orElse(constructBaseUrlService.constructBaseUrl()));
 
         mailingService.send(new SendMailVO(
             user.getEmail(),
@@ -88,12 +87,12 @@ public class MailService {
     }
 
     @Async
-    public void sendPasswordResetMail(User user, HttpServletRequest request) {
+    public void sendPasswordResetMail(User user) {
         log.debug("Sending password reset e-mail to '{}'", user.getEmail());
 
         Map<String, Object> additionalVariables = newHashMap();
         additionalVariables.put(USER, user);
-        additionalVariables.put(BASE_URL, constructBaseUrlService.constructBaseUrl(request));
+        additionalVariables.put(BASE_URL, constructBaseUrlService.constructBaseUrl());
 
         mailingService.send(new SendMailVO(
             user.getEmail(),

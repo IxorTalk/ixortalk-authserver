@@ -23,9 +23,9 @@
  */
 package com.ixortalk.authserver.web.rest;
 
+import com.ixortalk.authserver.config.IxorTalkProperties;
 import com.ixortalk.authserver.domain.User;
 import com.ixortalk.authserver.repository.UserRepository;
-import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.path.json.JsonPath;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -44,6 +44,9 @@ public class UserEndpointIntTest extends AbstractSpringIntegrationTest {
 
     @Inject
     private UserRepository userRepository;
+
+    @Inject
+    private IxorTalkProperties ixorTalkProperties;
 
     @Test
     public void getUser() {
@@ -95,6 +98,6 @@ public class UserEndpointIntTest extends AbstractSpringIntegrationTest {
                 .statusCode(HTTP_OK)
                 .extract().jsonPath();
 
-        assertThat(jsonPath.getString("userInfo.profilePictureUrl")).isEqualTo("http://localhost:" + RestAssured.port + RestAssured.basePath + "/api/profile-pictures/" + user.getProfilePictureKey());
+        assertThat(jsonPath.getString("userInfo.profilePictureUrl")).isEqualTo(ixorTalkProperties.getLoadbalancer().getExternal().getUrlWithoutStandardPorts() + ixorTalkProperties.getMicroservice("authserver").getContextPath() + "/api/profile-pictures/" + user.getProfilePictureKey());
     }
 }

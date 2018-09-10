@@ -29,6 +29,7 @@ import com.ixortalk.authserver.repository.AuthorityRepository;
 import com.ixortalk.authserver.repository.UserRepository;
 import com.ixortalk.authserver.security.SecurityUtils;
 import com.ixortalk.authserver.service.util.RandomUtil;
+import com.ixortalk.authserver.web.rest.ConstructBaseUrlService;
 import com.ixortalk.authserver.web.rest.dto.ManagedUserDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * Service class for managing users.
@@ -70,6 +73,9 @@ public class UserService {
 
     @Inject
     private EntityManager entityManager;
+
+    @Inject
+    private ConstructBaseUrlService constructBaseUrlService;
 
     public Optional<User> activateRegistration(String key) {
         log.debug("Activating user for activation key {}", key);
@@ -236,5 +242,9 @@ public class UserService {
             userRepository.delete(user);
             //userSearchRepository.delete(user);
         }
+    }
+
+    public String constructProfilePictureUrl(User user) {
+        return ofNullable(user.getProfilePictureKey()).map(profilePictureKey -> constructBaseUrlService.constructBaseUrl() + "/api/profile-pictures/" + profilePictureKey).orElse(null);
     }
 }
