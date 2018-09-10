@@ -96,7 +96,7 @@ public class AccountResource {
                     User user = userService.createUserInformation(managedUserDTO.getLogin(), managedUserDTO.getPassword(),
                     managedUserDTO.getFirstName(), managedUserDTO.getLastName(), managedUserDTO.getEmail().toLowerCase(),
                     managedUserDTO.getLangKey());
-                    mailService.sendActivationEmail(user, ofNullable(managedUserDTO.getEmailActivationBaseUrl()), request);
+                    mailService.sendActivationEmail(user, ofNullable(managedUserDTO.getEmailActivationBaseUrl()));
                     return new ResponseEntity<>(HttpStatus.CREATED);
                 })
         );
@@ -195,17 +195,16 @@ public class AccountResource {
      * POST   /account/reset_password/init : Send an e-mail to reset the password of the user
      *
      * @param mail the mail of the user
-     * @param request the HTTP request
      * @return the ResponseEntity with status 200 (OK) if the e-mail was sent, or status 400 (Bad Request) if the e-mail address is not registred
      */
     @RequestMapping(value = "/account/reset_password/init",
         method = RequestMethod.POST,
         produces = MediaType.TEXT_PLAIN_VALUE)
     @Timed
-    public ResponseEntity<?> requestPasswordReset(@RequestBody String mail, HttpServletRequest request) {
+    public ResponseEntity<?> requestPasswordReset(@RequestBody String mail) {
         return userService.requestPasswordReset(mail)
             .map(user -> {
-                mailService.sendPasswordResetMail(user, request);
+                mailService.sendPasswordResetMail(user);
                 return new ResponseEntity<>("e-mail was sent", HttpStatus.OK);
             }).orElse(new ResponseEntity<>("e-mail address not registered", HttpStatus.BAD_REQUEST));
     }

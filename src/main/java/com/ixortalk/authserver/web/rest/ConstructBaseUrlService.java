@@ -24,37 +24,17 @@
 package com.ixortalk.authserver.web.rest;
 
 import com.ixortalk.authserver.config.IxorTalkProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-
-import static com.ixortalk.authserver.config.IxorTalkProperties.Loadbalancer.isDefaultPort;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Named
-@EnableConfigurationProperties(IxorTalkProperties.class)
 public class ConstructBaseUrlService {
 
     @Inject
     private IxorTalkProperties ixorTalkProperties;
 
-    public String constructBaseUrl(HttpServletRequest request) {
-        if (!isEmpty(ixorTalkProperties.getLoadbalancer().getExternal().getUrl())) {
-            return ixorTalkProperties.getLoadbalancer().getExternal().getUrlWithoutStandardPorts() + ixorTalkProperties.getMicroservice("authserver").getContextPath();
-        }
-        StringBuilder baseUrlBuilder =
-            new StringBuilder()
-                .append(request.getScheme())
-                .append("://")
-                .append(request.getServerName());
-        if (!isDefaultPort(request.getScheme(), request.getServerPort())) {
-            baseUrlBuilder
-                .append(":")
-                .append(request.getServerPort());
-        }
-        baseUrlBuilder.append(request.getContextPath());
-        return baseUrlBuilder.toString();
+    public String constructBaseUrl() {
+        return ixorTalkProperties.getLoadbalancer().getExternal().getUrlWithoutStandardPorts() + ixorTalkProperties.getMicroservice("authserver").getContextPath();
     }
 }

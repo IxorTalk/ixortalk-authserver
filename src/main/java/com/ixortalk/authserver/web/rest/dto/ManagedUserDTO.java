@@ -46,6 +46,8 @@ public class ManagedUserDTO extends UserDTO {
 
     private ZonedDateTime lastModifiedDate;
 
+    private String profilePictureUrl;
+
     private String emailActivationBaseUrl;
 
     @NotNull
@@ -55,17 +57,18 @@ public class ManagedUserDTO extends UserDTO {
     public ManagedUserDTO() {
     }
 
-    public ManagedUserDTO(User user) {
+    public ManagedUserDTO(User user, String profilePictureUrl) {
         super(user);
         this.id = user.getId();
         this.createdDate = user.getCreatedDate();
         this.lastModifiedBy = user.getLastModifiedBy();
         this.lastModifiedDate = user.getLastModifiedDate();
+        this.profilePictureUrl = profilePictureUrl;
         this.password = null;
     }
 
     public ManagedUserDTO(Long id, String login, String password, String firstName, String lastName,
-                          String email, boolean activated, String langKey, Set<String> authorities , ZonedDateTime createdDate, String lastModifiedBy, ZonedDateTime lastModifiedDate ) {
+                          String email, boolean activated, String langKey, Set<String> authorities, ZonedDateTime createdDate, String lastModifiedBy, ZonedDateTime lastModifiedDate) {
         super(login, firstName, lastName, email, activated, langKey, authorities);
         this.id = id;
         this.createdDate = createdDate;
@@ -116,6 +119,10 @@ public class ManagedUserDTO extends UserDTO {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getProfilePictureUrl() {
+        return profilePictureUrl;
     }
 
     @Override
