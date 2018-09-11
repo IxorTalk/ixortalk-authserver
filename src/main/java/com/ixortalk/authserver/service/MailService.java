@@ -44,7 +44,8 @@ public class MailService {
     private final Logger log = LoggerFactory.getLogger(MailService.class);
 
     private static final String USER = "user";
-    private static final String BASE_URL = "baseUrl";
+    private static final String PLATFORM_URL = "platformUrl";
+    private static final String AUTHSERVER_URL = "authserverUrl";
 
     @Inject
     private MailingService mailingService;
@@ -58,7 +59,8 @@ public class MailService {
 
         Map<String, Object> additionalVariables = newHashMap();
         additionalVariables.put(USER, user);
-        additionalVariables.put(BASE_URL, specifiedBaseUrl.orElse(constructBaseUrlService.constructBaseUrl()));
+        additionalVariables.put(PLATFORM_URL, constructBaseUrlService.constructPlatformUrl());
+        additionalVariables.put(AUTHSERVER_URL, specifiedBaseUrl.orElse(constructBaseUrlService.constructAuthServerUrl()));
 
         mailingService.send(new SendMailVO(
             user.getEmail(),
@@ -75,7 +77,8 @@ public class MailService {
 
         Map<String, Object> additionalVariables = newHashMap();
         additionalVariables.put(USER, user);
-        additionalVariables.put(BASE_URL, specifiedBaseUrl.orElse(constructBaseUrlService.constructBaseUrl()));
+        additionalVariables.put(PLATFORM_URL, constructBaseUrlService.constructPlatformUrl());
+        additionalVariables.put(AUTHSERVER_URL, specifiedBaseUrl.orElse(constructBaseUrlService.constructAuthServerUrl()));
 
         mailingService.send(new SendMailVO(
             user.getEmail(),
@@ -92,7 +95,8 @@ public class MailService {
 
         Map<String, Object> additionalVariables = newHashMap();
         additionalVariables.put(USER, user);
-        additionalVariables.put(BASE_URL, constructBaseUrlService.constructBaseUrl());
+        additionalVariables.put(PLATFORM_URL, constructBaseUrlService.constructPlatformUrl());
+        additionalVariables.put(AUTHSERVER_URL, constructBaseUrlService.constructAuthServerUrl());
 
         mailingService.send(new SendMailVO(
             user.getEmail(),
