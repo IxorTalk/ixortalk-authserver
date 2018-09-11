@@ -245,6 +245,6 @@ public class UserService {
     }
 
     public String constructProfilePictureUrl(User user) {
-        return ofNullable(user.getProfilePictureKey()).map(profilePictureKey -> constructBaseUrlService.constructBaseUrl() + "/api/profile-pictures/" + profilePictureKey).orElse(null);
+        return ofNullable(user.getProfilePictureKey()).map(profilePictureKey -> constructBaseUrlService.constructAuthServerUrl() + "/api/profile-pictures/" + profilePictureKey).orElse(null);
     }
 }

@@ -34,7 +34,11 @@ public class ConstructBaseUrlService {
     @Inject
     private IxorTalkProperties ixorTalkProperties;
 
-    public String constructBaseUrl() {
-        return ixorTalkProperties.getLoadbalancer().getExternal().getUrlWithoutStandardPorts() + ixorTalkProperties.getMicroservice("authserver").getContextPath();
+    public String constructAuthServerUrl() {
+        return constructPlatformUrl() + ixorTalkProperties.getMicroservice("authserver").getContextPath();
+    }
+
+    public String constructPlatformUrl() {
+        return ixorTalkProperties.getLoadbalancer().getExternal().getUrlWithoutStandardPorts();
     }
 }
