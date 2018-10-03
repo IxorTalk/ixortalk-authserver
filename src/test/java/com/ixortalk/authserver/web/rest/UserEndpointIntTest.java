@@ -32,6 +32,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.inject.Inject;
 
+import java.util.Map;
+
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.getPasswordGrantAccessToken;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.http.ContentType.JSON;
@@ -60,6 +62,7 @@ public class UserEndpointIntTest extends AbstractSpringIntegrationTest {
                 .statusCode(HTTP_OK)
                 .extract().jsonPath();
 
+        assertThat(jsonPath.getObject(".", Map.class).keySet()).containsOnly("name", "authorities", "userInfo");
         assertThat(jsonPath.getString("name")).isEqualTo(USER_ID);
     }
 
