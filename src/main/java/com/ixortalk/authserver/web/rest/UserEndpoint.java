@@ -23,18 +23,15 @@
  */
 package com.ixortalk.authserver.web.rest;
 
-import com.ixortalk.authserver.domain.User;
+import com.ixortalk.authserver.domain.Authority;
 import com.ixortalk.authserver.service.UserService;
 import com.ixortalk.authserver.web.rest.dto.ManagedUserDTO;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
-import java.util.Optional;
-
-import static com.ixortalk.authserver.web.rest.EnhancedPrincipal.enhancedPrincipal;
+import java.util.Set;
 
 @RestController
 public class UserEndpoint {
@@ -43,14 +40,40 @@ public class UserEndpoint {
     private UserService userService;
 
     @RequestMapping("/user")
-    public EnhancedPrincipal user(Principal principal, HttpServletRequest request) {
-        Optional<User> userOptional = userService.getUserWithAuthoritiesByLogin(principal.getName());
-        return enhancedPrincipal(
-            principal,
-            userOptional
-                .map(user -> new ManagedUserDTO(user, userService.constructProfilePictureUrl(user)))
-                .orElse(null)
-            );
+    public UserInfo user(Principal principal) {
+        return userService.getUserWithAuthoritiesByLogin(principal.getName())
+            .map(user ->
+                new UserInfo(
+                    user.getLogin(),
+                    user.getAuthorities(),
+                    new ManagedUserDTO(user, userService.constructProfilePictureUrl(user))))
+            .orElseThrow(() -> new IllegalArgumentException("User not found!"));
     }
 }
+
+class UserInfo {
+
+    private String name;
+    private Set<Authority> authorities;
+    private ManagedUserDTO userInfo;
+
+    public UserInfo(String name, Set<Authority> authorities, ManagedUserDTO userInfo) {
+        this.name = name;
+        this.authorities = authorities;
+        this.userInfo = userInfo;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Set<Authority> getAuthorities() {
+        return authorities;
+    }
+
+    public ManagedUserDTO getUserInfo() {
+        return userInfo;
+    }
+}
+
 
