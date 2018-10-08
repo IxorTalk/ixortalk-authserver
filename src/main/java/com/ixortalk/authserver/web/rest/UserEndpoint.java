@@ -40,14 +40,14 @@ public class UserEndpoint {
     private UserService userService;
 
     @RequestMapping("/user")
-    public UserInfo user(Principal principal) {
+    public Object user(Principal principal) {
         return userService.getUserWithAuthoritiesByLogin(principal.getName())
-            .map(user ->
+            .<Object>map(user ->
                 new UserInfo(
                     user.getLogin(),
                     user.getAuthorities(),
                     new ManagedUserDTO(user, userService.constructProfilePictureUrl(user))))
-            .orElseThrow(() -> new IllegalArgumentException("User not found!"));
+            .orElse(principal);
     }
 }
 

@@ -31,9 +31,10 @@ import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.inject.Inject;
-
 import java.util.Map;
 
+import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_ID_ADMIN;
+import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.getPasswordGrantAccessToken;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.http.ContentType.JSON;
@@ -51,7 +52,7 @@ public class UserEndpointIntTest extends AbstractSpringIntegrationTest {
     private IxorTalkProperties ixorTalkProperties;
 
     @Test
-    public void getUser() {
+    public void user() {
         JsonPath jsonPath =
             given()
                 .auth().oauth2(getPasswordGrantAccessToken(USER_ID, "user").getValue())
@@ -67,7 +68,7 @@ public class UserEndpointIntTest extends AbstractSpringIntegrationTest {
     }
 
     @Test
-    public void getUser_noProfilePictureKey() {
+    public void user_noProfilePictureKey() {
         User user = userRepository.findOneByLogin(USER_ID).get();
         ReflectionTestUtils.setField(user, "profilePictureKey", null);
         userRepository.save(user);
@@ -86,7 +87,7 @@ public class UserEndpointIntTest extends AbstractSpringIntegrationTest {
     }
 
     @Test
-    public void getUser_withProfilePictureKey() {
+    public void user_withProfilePictureKey() {
         User user = userRepository.findOneByLogin(USER_ID).get();
         user.generateProfilePictureKey();
         userRepository.save(user);
@@ -102,5 +103,21 @@ public class UserEndpointIntTest extends AbstractSpringIntegrationTest {
                 .extract().jsonPath();
 
         assertThat(jsonPath.getString("userInfo.profilePictureUrl")).isEqualTo(ixorTalkProperties.getLoadbalancer().getExternal().getUrlWithoutStandardPorts() + ixorTalkProperties.getMicroservice("authserver").getContextPath() + "/api/profile-pictures/" + user.getProfilePictureKey());
+    }
+
+    @Test
+    public void oauth2Client() {
+        JsonPath jsonPath =
+            given()
+                .auth().oauth2(adminToken().getValue())
+                .accept(JSON)
+                .when()
+                .get("/user")
+                .then()
+                .statusCode(HTTP_OK)
+                .extract().jsonPath();
+
+        assertThat(jsonPath.getString("name")).isEqualTo(CLIENT_ID_ADMIN);
+        assertThat(jsonPath.getString("userInfo")).isNull();
     }
 }
