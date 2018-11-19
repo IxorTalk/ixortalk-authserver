@@ -23,21 +23,34 @@
  */
 package com.ixortalk.authserver.web.rest;
 
+import com.ixortalk.authserver.repository.AuthorityRepository;
 import com.ixortalk.authserver.web.rest.dto.AuthorityDTO;
+import org.junit.After;
 import org.junit.Test;
+
+import javax.inject.Inject;
 
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.userToken;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.http.ContentType.JSON;
-import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
-import static java.net.HttpURLConnection.HTTP_OK;
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static java.net.HttpURLConnection.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class AuthorityResourceIntTest extends AbstractSpringIntegrationTest {
 
+    public static final String ROLE_TEST = "ROLE_TEST";
+
+    @Inject
+    private AuthorityRepository authorityRepository;
+
+    @After
+    public void after() {
+        authorityRepository.findOneByName(ROLE_TEST).ifPresent(authority -> authorityRepository.delete(authority));
+    }
+
     @Test
-    public void normalUsersCannotRetrieveAuthorities() throws Exception {
+    public void normalUsersCannotRetrieveAuthorities() {
         given()
             .auth().oauth2(userToken().getValue())
             .accept(JSON)
@@ -49,7 +62,7 @@ public class AuthorityResourceIntTest extends AbstractSpringIntegrationTest {
     }
 
     @Test
-    public void adminUsersCanRetrieveAuthorities() throws Exception {
+    public void adminUsersCanRetrieveAuthorities() {
         AuthorityDTO[] authorityDTOs =
             given()
                 .auth().oauth2(adminToken().getValue())
@@ -64,5 +77,35 @@ public class AuthorityResourceIntTest extends AbstractSpringIntegrationTest {
                 .as(AuthorityDTO[].class);
 
         assertThat(authorityDTOs).hasSize(4).extracting(AuthorityDTO::getName).containsOnly("ROLE_ADMIN", "ROLE_USER", "ROLE_CUSTOM1", "ROLE_CUSTOM2");
+    }
+
+    @Test
+    public void addAuthority_asUser() {
+        given()
+            .auth().oauth2(userToken().getValue())
+            .accept(JSON)
+            .contentType(JSON)
+            .when()
+            .body("{\"name\": \"" + ROLE_TEST + "\"}")
+            .post("/api/authorities")
+            .then()
+            .statusCode(HTTP_FORBIDDEN);
+
+        assertThat(authorityRepository.findOneByName(ROLE_TEST)).isNotPresent();
+    }
+
+    @Test
+    public void addAuthority_asAdmin() {
+        given()
+            .auth().oauth2(adminToken().getValue())
+            .accept(JSON)
+            .contentType(JSON)
+            .when()
+            .body("{\"name\": \"" + ROLE_TEST + "\"}")
+            .post("/api/authorities")
+            .then()
+            .statusCode(HTTP_CREATED);
+
+        assertThat(authorityRepository.findOneByName(ROLE_TEST)).isPresent();
     }
 }
