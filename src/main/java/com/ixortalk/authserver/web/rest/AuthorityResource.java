@@ -23,29 +23,26 @@
  */
 package com.ixortalk.authserver.web.rest;
 
-import com.ixortalk.authserver.domain.Authority;
 import com.ixortalk.authserver.repository.AuthorityRepository;
 import com.ixortalk.authserver.security.AuthoritiesConstants;
 import com.ixortalk.authserver.web.rest.dto.AuthorityDTO;
-import com.ixortalk.authserver.web.rest.util.HeaderUtil;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.ixortalk.authserver.domain.Authority.newAuthority;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.http.ResponseEntity.ok;
+import static org.springframework.http.ResponseEntity.status;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 @RequestMapping("/api")
@@ -54,18 +51,20 @@ public class AuthorityResource {
     @Inject
     private AuthorityRepository authorityRepository;
 
-    @Inject
-    private EntityManager entityManager;
-
     @RequestMapping(value = "/authorities", method = GET, produces = APPLICATION_JSON_VALUE)
     @Secured(AuthoritiesConstants.ADMIN)
-    public ResponseEntity<List<AuthorityDTO>> getAllAuthorities()
-        throws URISyntaxException {
-        List<Authority> page = authorityRepository.findAll();
-        List<AuthorityDTO> authorityDTOs = page.stream()
-            .map(AuthorityDTO::new)
-            .collect(Collectors.toList());
-        return new ResponseEntity<>(authorityDTOs, HttpStatus.OK);
+    public ResponseEntity<List<AuthorityDTO>> getAllAuthorities() {
+        return ok(
+            authorityRepository.findAll().stream()
+                .map(AuthorityDTO::new)
+                .collect(Collectors.toList()));
+    }
+
+    @RequestMapping(value = "/authorities", method = POST, consumes = APPLICATION_JSON_VALUE)
+    @Secured(AuthoritiesConstants.ADMIN)
+    public ResponseEntity<?> addAuthority(@RequestBody AuthorityDTO authorityDTO) {
+        authorityRepository.save(newAuthority().withName(authorityDTO.getName()).build());
+        return status(CREATED).build();
     }
 
 }

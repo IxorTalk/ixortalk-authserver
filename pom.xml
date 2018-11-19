@@ -110,7 +110,7 @@
     </pluginRepositories>
 
     <properties>
-        <assertj-core.version>3.3.0</assertj-core.version>
+        <assertj-core.version>3.11.1</assertj-core.version>
         <awaitility.version>1.7.0</awaitility.version>
         <commons-io.version>2.4</commons-io.version>
         <commons-lang.version>2.6</commons-lang.version>
@@ -379,12 +379,6 @@
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${assertj-core.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>3.5.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
