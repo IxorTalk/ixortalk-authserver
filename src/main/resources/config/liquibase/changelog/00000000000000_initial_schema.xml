@@ -256,4 +256,9 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="00000000000004" author="wjans">
+        <modifyDataType tableName="jhi_authority" columnName="name" newDataType="varchar(60)" />
+        <modifyDataType tableName="jhi_user_authority" columnName="authority_name" newDataType="varchar(60)" />
+    </changeSet>
+
 </databaseChangeLog>
