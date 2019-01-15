@@ -39,10 +39,8 @@ import java.util.stream.Collectors;
 import static com.ixortalk.authserver.domain.Authority.newAuthority;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.ResponseEntity.ok;
-import static org.springframework.http.ResponseEntity.status;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.http.ResponseEntity.*;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 @RequestMapping("/api")
@@ -67,4 +65,15 @@ public class AuthorityResource {
         return status(CREATED).build();
     }
 
+    @RequestMapping(value = "/authorities-remove", method = POST, consumes = APPLICATION_JSON_VALUE)
+    @Secured(AuthoritiesConstants.ADMIN)
+    public ResponseEntity<?> removeAuthority(@RequestBody AuthorityDTO authorityDTO) {
+        return authorityRepository
+            .findOneByName(authorityDTO.getName())
+            .map(authority -> {
+                authorityRepository.delete(authority);
+                return ok().build();
+            })
+            .orElse(notFound().build());
+    }
 }
