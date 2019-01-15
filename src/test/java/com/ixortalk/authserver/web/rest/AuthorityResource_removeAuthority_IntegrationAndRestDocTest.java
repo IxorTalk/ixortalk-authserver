@@ -80,4 +80,18 @@ public class AuthorityResource_removeAuthority_IntegrationAndRestDocTest extends
 
         assertThat(authorityRepository.findOneByName(ROLE_TEST)).isPresent();
     }
+
+    @Test
+    public void removeAuthority_whenRoleDoesNotExist() {
+
+        given()
+            .auth().oauth2(adminToken().getValue())
+            .accept(JSON)
+            .contentType(JSON)
+            .when()
+            .body("{\"name\": \"randomRole\"}")
+            .post("/api/authorities-remove")
+            .then()
+            .statusCode(HTTP_NOT_FOUND);
+    }
 }
