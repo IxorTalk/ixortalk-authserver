@@ -52,7 +52,7 @@ public abstract class AbstractRestDocTest extends AbstractSpringIntegrationTest 
             .build();
     }
 
-    protected static UriModifyingOperationPreprocessor staticUris() {
+    public static UriModifyingOperationPreprocessor staticUris() {
         return modifyUris().scheme("https").host("instance.ixortalk.com").removePort();
     }
 
