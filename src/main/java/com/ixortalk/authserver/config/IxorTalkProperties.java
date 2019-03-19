@@ -42,6 +42,16 @@ public class IxorTalkProperties {
 
     private Map<String, Microservice> server = newHashMap();
 
+    private Logout logout = new Logout();
+
+    public Logout getLogout() {
+        return logout;
+    }
+
+    public void setLogout(Logout logout) {
+        this.logout = logout;
+    }
+
     public List<String> getRoles() {
         return roles;
     }
@@ -202,6 +212,28 @@ public class IxorTalkProperties {
 
         public void setUrl(String url) {
             this.url = url;
+        }
+    }
+
+    public static class Logout {
+
+        private String defaultRedirectUri;
+        private String redirectUriParamName;
+
+        public String getDefaultRedirectUri() {
+            return defaultRedirectUri;
+        }
+
+        public void setDefaultRedirectUri(String defaultRedirectUri) {
+            this.defaultRedirectUri = defaultRedirectUri;
+        }
+
+        public String getRedirectUriParamName() {
+            return redirectUriParamName;
+        }
+
+        public void setRedirectUriParamName(String redirectUriParamName) {
+            this.redirectUriParamName = redirectUriParamName;
         }
     }
 }

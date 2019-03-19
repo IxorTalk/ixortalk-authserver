@@ -27,7 +27,9 @@ import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.specification.RequestSpecification;
 import org.junit.Rule;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.restdocs.JUnitRestDocumentation;
+import org.springframework.test.context.TestPropertySource;
 
 import static com.ixortalk.authserver.restdocs.AbstractRestDocTest.AUTHORIZATION_TOKEN_HEADER;
 import static com.ixortalk.authserver.restdocs.AbstractRestDocTest.staticUris;
@@ -42,24 +44,20 @@ import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.documentationConfiguration;
 
-public class LogoutTest extends AbstractSpringIntegrationTest {
+@TestPropertySource(properties = {
+    "ixortalk.logout.default-redirect-uri: someLogin",
+    "ixortalk.logout.redirect-uri-param-name: aRedirectUri"
+})
+public class LogoutWithRedirectParameter_IntegrationAndRestDocTest extends AbstractSpringIntegrationTest {
+
+    @Value("${ixortalk.logout.default-redirect-uri}")
+    private String login;
+
+    @Value("${ixortalk.logout.redirect-uri-param-name}")
+    private String redirectUriParam;
 
     @Rule
     public JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation("target/generated-snippets");
-
-    @Test
-    public void logout_withoutRedirectParam() {
-        String location =
-            given()
-                .auth().preemptive().oauth2(adminToken().getValue())
-                .when()
-                .get("/signout")
-                .then()
-                .statusCode(HTTP_MOVED_TEMP)
-                .extract().header("Location");
-
-        assertThat(location).endsWith("/uaa/login");
-    }
 
     @Test
     public void logout_withRedirectParam() {
@@ -77,11 +75,11 @@ public class LogoutTest extends AbstractSpringIntegrationTest {
                         preprocessResponse(prettyPrint()),
                         requestHeaders(AUTHORIZATION_TOKEN_HEADER),
                         requestParameters(
-                            parameterWithName("redirect_uri").description("After a successful logout, the header will be redirected to the specified location.")
+                            parameterWithName(redirectUriParam).description("After a successful logout, the header will be redirected to the specified location.")
                         )
                     )
                 )
-                .param("redirect_uri", "foo://bar/redirect")
+                .param(redirectUriParam, "foo://bar/redirect")
                 .get("/signout")
                 .then()
                 .statusCode(HTTP_MOVED_TEMP)
@@ -96,13 +94,28 @@ public class LogoutTest extends AbstractSpringIntegrationTest {
             given()
                 .auth().preemptive().oauth2(adminToken().getValue())
                 .when()
-                .param("redirect_uri", "")
+                .param(redirectUriParam, "")
                 .get("/signout")
                 .then()
                 .statusCode(HTTP_MOVED_TEMP)
                 .extract().header("Location");
 
-        assertThat(location).endsWith("/uaa/login");
+        assertThat(location).endsWith("/uaa/"+login);
+    }
+
+    @Test
+    public void logout_withNullRedirectParam() {
+        String location =
+            given()
+                .auth().preemptive().oauth2(adminToken().getValue())
+                .when()
+                .param(redirectUriParam)
+                .get("/signout")
+                .then()
+                .statusCode(HTTP_MOVED_TEMP)
+                .extract().header("Location");
+
+        assertThat(location).endsWith("/uaa/"+login);
     }
 }
 
