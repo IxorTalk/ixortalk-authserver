@@ -47,7 +47,7 @@ import static org.springframework.restdocs.restassured.RestAssuredRestDocumentat
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.documentationConfiguration;
 
 @TestPropertySource(properties = {
-    "ixortalk.logout.redirect-uri-param-name: aRedirectUri"
+    "ixortalk.logout.redirect-uri-param-name: redirect_uri"
 })
 public class LogoutWithRedirectParameter_IntegrationAndRestDocTest extends AbstractSpringIntegrationTest {
 

@@ -48,10 +48,6 @@ public class IxorTalkProperties {
         return logout;
     }
 
-    public void setLogout(Logout logout) {
-        this.logout = logout;
-    }
-
     public List<String> getRoles() {
         return roles;
     }
@@ -219,6 +215,10 @@ public class IxorTalkProperties {
 
         private String defaultRedirectUri = "/login";
         private String redirectUriParamName;
+
+        public void setDefaultRedirectUri(String defaultRedirectUri) {
+            this.defaultRedirectUri = defaultRedirectUri;
+        }
 
         public String getDefaultRedirectUri() {
             return defaultRedirectUri;
