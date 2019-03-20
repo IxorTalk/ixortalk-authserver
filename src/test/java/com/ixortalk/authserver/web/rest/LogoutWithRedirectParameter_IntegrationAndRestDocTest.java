@@ -23,6 +23,7 @@
  */
 package com.ixortalk.authserver.web.rest;
 
+import com.ixortalk.authserver.config.IxorTalkProperties;
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.specification.RequestSpecification;
 import org.junit.Rule;
@@ -31,6 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.test.context.TestPropertySource;
 
+import javax.inject.Inject;
 import static com.ixortalk.authserver.restdocs.AbstractRestDocTest.AUTHORIZATION_TOKEN_HEADER;
 import static com.ixortalk.authserver.restdocs.AbstractRestDocTest.staticUris;
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
@@ -45,16 +47,16 @@ import static org.springframework.restdocs.restassured.RestAssuredRestDocumentat
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.documentationConfiguration;
 
 @TestPropertySource(properties = {
-    "ixortalk.logout.default-redirect-uri: someLogin",
     "ixortalk.logout.redirect-uri-param-name: aRedirectUri"
 })
 public class LogoutWithRedirectParameter_IntegrationAndRestDocTest extends AbstractSpringIntegrationTest {
 
-    @Value("${ixortalk.logout.default-redirect-uri}")
-    private String login;
 
     @Value("${ixortalk.logout.redirect-uri-param-name}")
     private String redirectUriParam;
+
+    @Inject
+    private IxorTalkProperties ixorTalkProperties;
 
     @Rule
     public JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation("target/generated-snippets");
@@ -64,6 +66,8 @@ public class LogoutWithRedirectParameter_IntegrationAndRestDocTest extends Abstr
         RequestSpecification spec = new RequestSpecBuilder()
             .addFilter(documentationConfiguration(this.restDocumentation))
             .build();
+
+        String newRedirectUri = "foo://bar/redirect";
 
         String location =
             given(spec)
@@ -79,13 +83,13 @@ public class LogoutWithRedirectParameter_IntegrationAndRestDocTest extends Abstr
                         )
                     )
                 )
-                .param(redirectUriParam, "foo://bar/redirect")
+                .param(redirectUriParam, newRedirectUri)
                 .get("/signout")
                 .then()
                 .statusCode(HTTP_MOVED_TEMP)
                 .extract().header("Location");
 
-        assertThat(location).isEqualTo("foo://bar/redirect");
+        assertThat(location).isEqualTo(newRedirectUri);
     }
 
     @Test
@@ -100,7 +104,7 @@ public class LogoutWithRedirectParameter_IntegrationAndRestDocTest extends Abstr
                 .statusCode(HTTP_MOVED_TEMP)
                 .extract().header("Location");
 
-        assertThat(location).endsWith("/uaa/"+login);
+        assertThat(location).endsWith("/uaa"+ixorTalkProperties.getLogout().getDefaultRedirectUri());
     }
 
     @Test
@@ -115,7 +119,7 @@ public class LogoutWithRedirectParameter_IntegrationAndRestDocTest extends Abstr
                 .statusCode(HTTP_MOVED_TEMP)
                 .extract().header("Location");
 
-        assertThat(location).endsWith("/uaa/"+login);
+        assertThat(location).endsWith("/uaa"+ixorTalkProperties.getLogout().getDefaultRedirectUri());
     }
 }
 

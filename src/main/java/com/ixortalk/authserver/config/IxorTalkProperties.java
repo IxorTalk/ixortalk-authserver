@@ -217,15 +217,11 @@ public class IxorTalkProperties {
 
     public static class Logout {
 
-        private String defaultRedirectUri;
+        private String defaultRedirectUri = "/login";
         private String redirectUriParamName;
 
         public String getDefaultRedirectUri() {
             return defaultRedirectUri;
-        }
-
-        public void setDefaultRedirectUri(String defaultRedirectUri) {
-            this.defaultRedirectUri = defaultRedirectUri;
         }
 
         public String getRedirectUriParamName() {

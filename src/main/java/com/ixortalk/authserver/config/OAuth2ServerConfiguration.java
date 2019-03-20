@@ -43,6 +43,7 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -150,9 +151,6 @@ public class OAuth2ServerConfiguration {
             @Override
             protected void configure(HttpSecurity http) throws Exception {
                 // @formatter:off
-                SimpleUrlLogoutSuccessHandler logoutSuccessHandler =  new SimpleUrlLogoutSuccessHandler();
-                logoutSuccessHandler.setDefaultTargetUrl("/"+ixorTalkProperties.getLogout().getDefaultRedirectUri());
-                logoutSuccessHandler.setTargetUrlParameter(ixorTalkProperties.getLogout().getRedirectUriParamName());
                 ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry =
                     http
                         .formLogin()
@@ -165,7 +163,7 @@ public class OAuth2ServerConfiguration {
                         .and()
                             .logout()
                             .logoutRequestMatcher(new AntPathRequestMatcher("/signout"))
-                            .logoutSuccessHandler(logoutSuccessHandler)
+                            .logoutSuccessHandler(logoutSuccessHandler())
                         .and()
                             .authorizeRequests()
                             .antMatchers("/").permitAll();
@@ -178,6 +176,13 @@ public class OAuth2ServerConfiguration {
                     .anyRequest()
                     .authenticated();
                 // @formatter:on
+            }
+
+            private LogoutSuccessHandler logoutSuccessHandler() {
+                SimpleUrlLogoutSuccessHandler logoutSuccessHandler =  new SimpleUrlLogoutSuccessHandler();
+                logoutSuccessHandler.setDefaultTargetUrl(ixorTalkProperties.getLogout().getDefaultRedirectUri());
+                logoutSuccessHandler.setTargetUrlParameter(ixorTalkProperties.getLogout().getRedirectUriParamName());
+                return  logoutSuccessHandler;
             }
 
             private String[] requestMatchers() {

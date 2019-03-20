@@ -23,22 +23,19 @@
  */
 package com.ixortalk.authserver.web.rest;
 
+import com.ixortalk.authserver.config.IxorTalkProperties;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.TestPropertySource;
+import javax.inject.Inject;
 
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
 import static com.jayway.restassured.RestAssured.given;
 import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@TestPropertySource(properties = {
-    "ixortalk.logout.default-redirect-uri: someLogin"
-})
 public class LogoutWithoutParameter_IntegrationTest extends AbstractSpringIntegrationTest {
 
-    @Value("${ixortalk.logout.default-redirect-uri}")
-    private String login;
+    @Inject
+    private IxorTalkProperties ixorTalkProperties;
 
     @Test
     public void logout_withoutRedirectParam() {
@@ -51,7 +48,7 @@ public class LogoutWithoutParameter_IntegrationTest extends AbstractSpringIntegr
                 .statusCode(HTTP_MOVED_TEMP)
                 .extract().header("Location");
 
-        assertThat(location).endsWith("/uaa/"+login);
+        assertThat(location).endsWith("/uaa"+ixorTalkProperties.getLogout().getDefaultRedirectUri());
     }
 }
 
