@@ -83,6 +83,8 @@ ixortalk:
     server:
         mailing-service:
             url: http://localhost:65444/mailing
+    logout:
+        redirect-uri-param-name: redirect_uri
 
 
 # ===================================================================

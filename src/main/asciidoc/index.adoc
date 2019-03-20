@@ -120,3 +120,25 @@ include::{snippets}/set-profile-picture/ok/http-response.adoc[]
 When the logged in user is not allowed to upload a new profile picture (should have `ROLE_ADMIN` or uploading its own profile picture):
 
 include::{snippets}/set-profile-picture/not-allowed/http-response.adoc[]
+
+== Redirect URI
+
+Redirect URI's can be specified by setting the `redirect_uri` parameter
+
+=== Request
+
+Via curl:
+include::{snippets}/logout-with-redirect/ok/curl-request.adoc[]
+
+HTTP request:
+include::{snippets}/logout-with-redirect/ok/http-request.adoc[]
+
+==== Request Headers
+include::{snippets}/logout-with-redirect/ok/request-headers.adoc[]
+
+==== Request Parameters
+include::{snippets}/logout-with-redirect/ok/request-parameters.adoc[]
+
+=== Response
+
+include::{snippets}/logout-with-redirect/ok/http-response.adoc[]

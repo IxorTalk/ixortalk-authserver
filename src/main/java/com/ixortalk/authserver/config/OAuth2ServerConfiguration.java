@@ -23,12 +23,6 @@
  */
 package com.ixortalk.authserver.config;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.sql.DataSource;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
@@ -49,7 +43,14 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+import javax.inject.Inject;
+import javax.sql.DataSource;
+import java.util.List;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toSet;
@@ -144,6 +145,9 @@ public class OAuth2ServerConfiguration {
             @Inject
             private ManagementServerProperties managementServerProperties;
 
+            @Inject
+            private IxorTalkProperties ixorTalkProperties;
+
             @Override
             protected void configure(HttpSecurity http) throws Exception {
                 // @formatter:off
@@ -159,7 +163,7 @@ public class OAuth2ServerConfiguration {
                         .and()
                             .logout()
                             .logoutRequestMatcher(new AntPathRequestMatcher("/signout"))
-                            .logoutSuccessUrl("/login")
+                            .logoutSuccessHandler(logoutSuccessHandler())
                         .and()
                             .authorizeRequests()
                             .antMatchers("/").permitAll();
@@ -172,6 +176,13 @@ public class OAuth2ServerConfiguration {
                     .anyRequest()
                     .authenticated();
                 // @formatter:on
+            }
+
+            private LogoutSuccessHandler logoutSuccessHandler() {
+                SimpleUrlLogoutSuccessHandler logoutSuccessHandler =  new SimpleUrlLogoutSuccessHandler();
+                logoutSuccessHandler.setDefaultTargetUrl(ixorTalkProperties.getLogout().getDefaultRedirectUri());
+                logoutSuccessHandler.setTargetUrlParameter(ixorTalkProperties.getLogout().getRedirectUriParamName());
+                return  logoutSuccessHandler;
             }
 
             private String[] requestMatchers() {
