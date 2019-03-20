@@ -22,7 +22,7 @@
 # SOFTWARE.
 #
 
-FROM frolvlad/alpine-oraclejdk8:slim
+FROM openjdk:8u181-jdk
 ADD ixortalk-authserver-*.war /app.war
 ADD healthcheck.sh /healthcheck.sh
 RUN sh -c 'touch /app.war' && chmod +x /healthcheck.sh
