@@ -41,7 +41,7 @@ ixortalk:
   profile-picture:
     s3-bucket: the-s3-test-bucket-for-profile-pics
 
-# See https://github.com/IxorTalk/ixortalk-authserver/issues/36
+# See https://github.com/IxorTalk/ixortalk-aws-s3-library/issues/7
 com:
     ixortalk:
         s3:
