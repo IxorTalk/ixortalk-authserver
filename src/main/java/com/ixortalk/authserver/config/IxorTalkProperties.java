@@ -44,6 +44,8 @@ public class IxorTalkProperties {
 
     private Logout logout = new Logout();
 
+    private ProfilePicture profilePicture = new ProfilePicture();
+
     public Logout getLogout() {
         return logout;
     }
@@ -78,6 +80,10 @@ public class IxorTalkProperties {
 
     public Microservice getMicroservice(String name) {
         return getServer().get(name);
+    }
+
+    public ProfilePicture getProfilePicture() {
+        return profilePicture;
     }
 
     public static class OAuth {
@@ -230,6 +236,19 @@ public class IxorTalkProperties {
 
         public void setRedirectUriParamName(String redirectUriParamName) {
             this.redirectUriParamName = redirectUriParamName;
+        }
+    }
+
+    public static class ProfilePicture {
+
+        private String s3Bucket;
+
+        public String getS3Bucket() {
+            return s3Bucket;
+        }
+
+        public void setS3Bucket(String s3Bucket) {
+            this.s3Bucket = s3Bucket;
         }
     }
 }
