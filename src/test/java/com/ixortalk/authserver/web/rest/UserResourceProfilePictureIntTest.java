@@ -30,7 +30,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.TestPropertySource;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -49,7 +48,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-@TestPropertySource(properties = {"com.ixortalk.s3.default-bucket: default-bucket-test-config"})
 public class UserResourceProfilePictureIntTest extends AbstractSpringIntegrationTest {
 
     public static final byte[] BINARY_CONTENT = nextString("binaryContent").getBytes();
@@ -77,7 +75,7 @@ public class UserResourceProfilePictureIntTest extends AbstractSpringIntegration
 
     @Test
     public void getProfilePictureByLogin() {
-        mockGetFromS3(awsS3Template, INITIAL_PROFILE_PICTURE_KEY, BINARY_CONTENT, PHOTO_CONTENT_TYPE);
+        mockGetFromS3(awsS3Template, ixorTalkProperties.getProfilePicture().getS3Bucket(), INITIAL_PROFILE_PICTURE_KEY, BINARY_CONTENT, PHOTO_CONTENT_TYPE);
 
         byte[] binaryResponse =
             given()
@@ -94,7 +92,7 @@ public class UserResourceProfilePictureIntTest extends AbstractSpringIntegration
 
     @Test
     public void getProfilePictureByLogin_AsUser_FromOtherUser() {
-        mockGetFromS3(awsS3Template, INITIAL_PROFILE_PICTURE_KEY, BINARY_CONTENT, PHOTO_CONTENT_TYPE);
+        mockGetFromS3(awsS3Template, ixorTalkProperties.getProfilePicture().getS3Bucket(), INITIAL_PROFILE_PICTURE_KEY, BINARY_CONTENT, PHOTO_CONTENT_TYPE);
 
         byte[] binaryResponse =
             given()
@@ -124,7 +122,7 @@ public class UserResourceProfilePictureIntTest extends AbstractSpringIntegration
         setField(user, "profilePictureKey", null);
         user = userRepository.save(user);
 
-        doThrow(new IllegalArgumentException("Key cannot be null")).when(awsS3Template).get(null);
+        doThrow(new IllegalArgumentException("Key cannot be null")).when(awsS3Template).get(ixorTalkProperties.getProfilePicture().getS3Bucket(), null);
 
         given()
             .auth().preemptive().oauth2(adminToken().getValue())
@@ -136,7 +134,7 @@ public class UserResourceProfilePictureIntTest extends AbstractSpringIntegration
 
     @Test
     public void getProfilePictureByKey() {
-        mockGetFromS3(awsS3Template, INITIAL_PROFILE_PICTURE_KEY, BINARY_CONTENT, PHOTO_CONTENT_TYPE);
+        mockGetFromS3(awsS3Template, ixorTalkProperties.getProfilePicture().getS3Bucket(), INITIAL_PROFILE_PICTURE_KEY, BINARY_CONTENT, PHOTO_CONTENT_TYPE);
 
         byte[] binaryResponse =
             given()
@@ -162,7 +160,7 @@ public class UserResourceProfilePictureIntTest extends AbstractSpringIntegration
 
     @Test
     public void getProfilePictureByKey_errorReturnedByS3() {
-        doThrow(new IllegalArgumentException("Not found in S3")).when(awsS3Template).get(INITIAL_PROFILE_PICTURE_KEY);
+        doThrow(new IllegalArgumentException("Not found in S3")).when(awsS3Template).get(ixorTalkProperties.getProfilePicture().getS3Bucket(), INITIAL_PROFILE_PICTURE_KEY);
 
         given()
             .auth().preemptive().oauth2(adminToken().getValue())
@@ -185,7 +183,7 @@ public class UserResourceProfilePictureIntTest extends AbstractSpringIntegration
             .then()
             .statusCode(HTTP_OK);
 
-        verifySaveInS3(awsS3Template, userRepository.findOneByLogin(user.getLogin()).map(User::getProfilePictureKey).orElseThrow(() -> new IllegalStateException("User " + user.getLogin() + " should exist at this point!")));
+        verifySaveInS3(awsS3Template, ixorTalkProperties.getProfilePicture().getS3Bucket(), userRepository.findOneByLogin(user.getLogin()).map(User::getProfilePictureKey).orElseThrow(() -> new IllegalStateException("User " + user.getLogin() + " should exist at this point!")));
     }
 
     @Test
@@ -202,7 +200,7 @@ public class UserResourceProfilePictureIntTest extends AbstractSpringIntegration
             .statusCode(HTTP_OK);
 
         String profilePictureKey = userRepository.findOneByLogin(user.getLogin()).map(User::getProfilePictureKey).orElseThrow(() -> new IllegalStateException("User " + user.getLogin() + " should exist at this point!"));
-        verifySaveInS3(awsS3Template, profilePictureKey);
+        verifySaveInS3(awsS3Template, ixorTalkProperties.getProfilePicture().getS3Bucket(), profilePictureKey);
         assertThat(profilePictureKey).isNotEqualTo(INITIAL_PROFILE_PICTURE_KEY);
     }
 
@@ -221,7 +219,7 @@ public class UserResourceProfilePictureIntTest extends AbstractSpringIntegration
             .then()
             .statusCode(HTTP_OK);
 
-        verifySaveInS3(awsS3Template, userRepository.findOneByLogin(user.getLogin()).map(User::getProfilePictureKey).orElseThrow(() -> new IllegalStateException("User " + user.getLogin() + " should exist at this point!")));
+        verifySaveInS3(awsS3Template, ixorTalkProperties.getProfilePicture().getS3Bucket(), userRepository.findOneByLogin(user.getLogin()).map(User::getProfilePictureKey).orElseThrow(() -> new IllegalStateException("User " + user.getLogin() + " should exist at this point!")));
     }
 
     @Test

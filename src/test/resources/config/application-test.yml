@@ -38,3 +38,11 @@ ixortalk:
           protocol: https
           port: 443
 
+  profile-picture:
+    s3-bucket: the-s3-test-bucket-for-profile-pics
+
+# See https://github.com/IxorTalk/ixortalk-aws-s3-library/issues/7
+com:
+    ixortalk:
+        s3:
+            default-bucket: ${ixortalk.profile-picture.s3-bucket}

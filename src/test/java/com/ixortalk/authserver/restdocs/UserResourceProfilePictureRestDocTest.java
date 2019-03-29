@@ -30,7 +30,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.TestPropertySource;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -50,7 +49,6 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
 
-@TestPropertySource(properties = {"com.ixortalk.s3.default-bucket: default-bucket-test-config"})
 public class UserResourceProfilePictureRestDocTest extends AbstractRestDocTest {
 
     public static final String INITIAL_PROFILE_PICTURE_KEY = randomUUID().toString();
@@ -78,7 +76,7 @@ public class UserResourceProfilePictureRestDocTest extends AbstractRestDocTest {
 
     @Test
     public void getProfilePictureByLogin() {
-        mockGetFromS3(awsS3Template, user.getProfilePictureKey(), BINARY_CONTENT, PHOTO_CONTENT_TYPE);
+        mockGetFromS3(awsS3Template, ixorTalkProperties.getProfilePicture().getS3Bucket(), user.getProfilePictureKey(), BINARY_CONTENT, PHOTO_CONTENT_TYPE);
 
         given(this.spec)
             .auth().preemptive().oauth2(adminToken().getValue())
@@ -120,7 +118,7 @@ public class UserResourceProfilePictureRestDocTest extends AbstractRestDocTest {
 
     @Test
     public void getProfilePictureByKey() {
-        mockGetFromS3(awsS3Template, user.getProfilePictureKey(), BINARY_CONTENT, PHOTO_CONTENT_TYPE);
+        mockGetFromS3(awsS3Template, ixorTalkProperties.getProfilePicture().getS3Bucket(), user.getProfilePictureKey(), BINARY_CONTENT, PHOTO_CONTENT_TYPE);
 
         given(this.spec)
             .auth().preemptive().oauth2(adminToken().getValue())

@@ -26,6 +26,7 @@ package com.ixortalk.authserver.web.rest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.codahale.metrics.annotation.Timed;
 import com.ixortalk.authserver.config.Constants;
+import com.ixortalk.authserver.config.IxorTalkProperties;
 import com.ixortalk.authserver.domain.User;
 import com.ixortalk.authserver.repository.UserRepository;
 import com.ixortalk.aws.s3.library.config.AwsS3Template;
@@ -73,7 +74,7 @@ import static org.springframework.http.ResponseEntity.ok;
  */
 @RestController
 @RequestMapping("/api")
-@ConditionalOnProperty({"com.ixortalk.s3.default-bucket"})
+@ConditionalOnProperty("ixortalk.profile-picture.s3-bucket")
 public class UserProfilePictureResource {
 
     private final Logger log = LoggerFactory.getLogger(UserProfilePictureResource.class);
@@ -83,6 +84,9 @@ public class UserProfilePictureResource {
 
     @Inject
     private AwsS3Template awsS3Template;
+
+    @Inject
+    private IxorTalkProperties ixorTalkProperties;
 
     @RequestMapping(value = "/users/{login:" + Constants.LOGIN_REGEX + "}/profile-picture", method = RequestMethod.GET)
     @Timed
@@ -102,7 +106,7 @@ public class UserProfilePictureResource {
         return optionalUser
             .map(user -> {
                 try {
-                    S3Object s3Object = awsS3Template.get(user.getProfilePictureKey());
+                    S3Object s3Object = awsS3Template.get(ixorTalkProperties.getProfilePicture().getS3Bucket(), user.getProfilePictureKey());
                     return ok()
                         .contentType(valueOf(s3Object.getObjectMetadata().getContentType()))
                         .body(toByteArray(s3Object.getObjectContent()));
@@ -124,7 +128,7 @@ public class UserProfilePictureResource {
             .map(User::generateProfilePictureKey)
             .map(user -> {
                 try {
-                    awsS3Template.save(user.getProfilePictureKey(), uploadedFileRef);
+                    awsS3Template.save(ixorTalkProperties.getProfilePicture().getS3Bucket(), user.getProfilePictureKey(), uploadedFileRef);
                 } catch (Exception e) {
                     log.error("Error setting profile picture: " + e.getMessage(), e);
                     return notFound().build();
