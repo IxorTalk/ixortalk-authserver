@@ -157,7 +157,7 @@
         <dropwizard-metrics.version>3.2.5</dropwizard-metrics.version>
         <ixortalk-test.version>1.0.2</ixortalk-test.version>
         <ixortalk-util.version>1.0.2</ixortalk-util.version>
-        <ixortalk-aws-s3-library.version>1.0.1</ixortalk-aws-s3-library.version>
+        <ixortalk-aws-s3-library.version>1.1.0</ixortalk-aws-s3-library.version>
     </properties>
 
     <dependencyManagement>
