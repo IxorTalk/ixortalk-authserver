@@ -24,10 +24,8 @@
 package com.ixortalk.authserver.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-
 import com.ixortalk.authserver.domain.User;
 import com.ixortalk.authserver.repository.UserRepository;
-import com.ixortalk.authserver.security.AuthoritiesConstants;
 import com.ixortalk.authserver.security.SecurityUtils;
 import com.ixortalk.authserver.service.MailService;
 import com.ixortalk.authserver.service.UserService;
@@ -35,7 +33,6 @@ import com.ixortalk.authserver.web.rest.dto.KeyAndPasswordDTO;
 import com.ixortalk.authserver.web.rest.dto.ManagedUserDTO;
 import com.ixortalk.authserver.web.rest.dto.UserDTO;
 import com.ixortalk.authserver.web.rest.util.HeaderUtil;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,13 +40,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.*;
+import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 
@@ -81,7 +77,6 @@ public class AccountResource {
     @RequestMapping(value = "/register",
                     method = RequestMethod.POST,
                     produces={MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE})
-    @Secured(AuthoritiesConstants.ADMIN)
     @Timed
     public ResponseEntity<?> registerAccount(@Valid @RequestBody ManagedUserDTO managedUserDTO, HttpServletRequest request) {
 
