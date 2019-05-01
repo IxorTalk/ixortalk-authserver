@@ -46,6 +46,7 @@ public class MailService {
     private static final String USER = "user";
     private static final String PLATFORM_URL = "platformUrl";
     private static final String AUTHSERVER_URL = "authserverUrl";
+    private static final String ACTIVATION_KEY = "activationKey";
 
     @Inject
     private MailingService mailingService;
@@ -59,6 +60,7 @@ public class MailService {
 
         Map<String, Object> additionalVariables = newHashMap();
         additionalVariables.put(USER, user);
+        additionalVariables.put(ACTIVATION_KEY, user.getActivationKey());
         additionalVariables.put(PLATFORM_URL, constructBaseUrlService.constructPlatformUrl());
         additionalVariables.put(AUTHSERVER_URL, specifiedBaseUrl.orElse(constructBaseUrlService.constructAuthServerUrl()));
 
