@@ -78,7 +78,7 @@ public class AccountResource {
                     method = RequestMethod.POST,
                     produces={MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE})
     @Timed
-    public ResponseEntity<?> registerAccount(@Valid @RequestBody ManagedUserDTO managedUserDTO, HttpServletRequest request) {
+    public ResponseEntity<?> registerAccount(@Valid @RequestBody ManagedUserDTO managedUserDTO, HttpServletRequest request, @RequestParam(name = "activationEmail", defaultValue = "true") boolean activationEmail) {
 
         HttpHeaders textPlainHeaders = new HttpHeaders();
         textPlainHeaders.setContentType(MediaType.TEXT_PLAIN);
@@ -91,7 +91,9 @@ public class AccountResource {
                     User user = userService.createUserInformation(managedUserDTO.getLogin(), managedUserDTO.getPassword(),
                     managedUserDTO.getFirstName(), managedUserDTO.getLastName(), managedUserDTO.getEmail().toLowerCase(),
                     managedUserDTO.getLangKey());
-                    mailService.sendActivationEmail(user, ofNullable(managedUserDTO.getEmailActivationBaseUrl()));
+                    if (activationEmail) {
+                        mailService.sendActivationEmail(user, ofNullable(managedUserDTO.getEmailActivationBaseUrl()));
+                    }
                     return new ResponseEntity<>(HttpStatus.CREATED);
                 })
         );

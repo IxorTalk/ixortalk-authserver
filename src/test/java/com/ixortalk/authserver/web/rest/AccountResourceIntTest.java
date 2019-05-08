@@ -205,6 +205,37 @@ public class AccountResourceIntTest {
 
     @Test
     @Transactional
+    public void testRegisterValid_noActivationEmail() throws Exception {
+        ManagedUserDTO validUser = new ManagedUserDTO(
+            null,                   // id
+            "joe",                  // login
+            "password",             // password
+            "Joe",                  // firstName
+            "Shmoe",                // lastName
+            "joe@example.com",      // e-mail
+            true,                   // activated
+            "en",               // langKey
+            new HashSet<>(Arrays.asList(AuthoritiesConstants.USER)),
+            null,                   // createdDate
+            null,                   // lastModifiedBy
+            null                    // lastModifiedDate
+        );
+
+        restMvc.perform(
+            post("/api/register")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .param("activationEmail", "false")
+                .content(TestUtil.convertObjectToJsonBytes(validUser)))
+            .andExpect(status().isCreated());
+
+        Optional<User> user = userRepository.findOneByLogin("joe");
+        assertThat(user.isPresent()).isTrue();
+
+        verifyZeroInteractions(mockMailingService);
+    }
+
+    @Test
+    @Transactional
     public void testRegisterInvalidLogin() throws Exception {
         ManagedUserDTO invalidUser = new ManagedUserDTO(
             null,                   // id
