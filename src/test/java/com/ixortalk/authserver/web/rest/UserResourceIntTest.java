@@ -27,12 +27,14 @@ import com.ixortalk.authserver.config.IxorTalkProperties;
 import com.ixortalk.authserver.domain.User;
 import com.ixortalk.authserver.repository.UserRepository;
 import com.jayway.restassured.path.json.JsonPath;
+import org.junit.After;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.inject.Inject;
 
+import static com.ixortalk.authserver.domain.UserTestBuilder.aUser;
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.http.ContentType.JSON;
@@ -44,12 +46,18 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 public class UserResourceIntTest extends AbstractSpringIntegrationTest {
 
     public static final String USER_ID = "user";
+    public static final String EMAIL_LOGIN = "somebody@something.org";
 
     @Inject
     private UserRepository userRepository;
 
     @Inject
     private IxorTalkProperties ixorTalkProperties;
+
+    @After
+    public void after() {
+        userRepository.findOneByLogin(EMAIL_LOGIN).ifPresent(userRepository::delete);
+    }
 
     @Test
     public void getUser_existing() {
@@ -114,5 +122,22 @@ public class UserResourceIntTest extends AbstractSpringIntegrationTest {
                 .extract().jsonPath();
 
         assertThat(jsonPath.getString("profilePictureUrl")).isEqualTo(ixorTalkProperties.getLoadbalancer().getExternal().getUrlWithoutStandardPorts() + ixorTalkProperties.getMicroservice("authserver").getContextPath() + "/api/profile-pictures/" + user.getProfilePictureKey());
+    }
+
+    @Test
+    public void getUser_EmailLogin() {
+        userRepository.save(aUser().withLogin(EMAIL_LOGIN).build());
+
+        JsonPath jsonPath =
+            given()
+                .auth().oauth2(adminToken().getValue())
+                .accept(JSON)
+                .when()
+                .get("/api/users/" + EMAIL_LOGIN)
+                .then()
+                .statusCode(HTTP_OK)
+                .extract().jsonPath();
+
+        assertThat(jsonPath.getString("login")).isEqualTo(EMAIL_LOGIN);
     }
 }
