@@ -208,6 +208,7 @@ public class IxorTalkProperties {
             this.contextPath = contextPath;
         }
 
+
         public String getUrl() {
             return url;
         }
