@@ -99,19 +99,6 @@ public class IxorTalkProperties {
         }
     }
 
-    public static class AuditLog {
-
-        private boolean enabled;
-
-        public boolean isEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(boolean enabled) {
-            this.enabled = enabled;
-        }
-    }
-
     public static class Clients {
         private boolean useJdbc = false;
 
@@ -220,6 +207,7 @@ public class IxorTalkProperties {
         public void setContextPath(String contextPath) {
             this.contextPath = contextPath;
         }
+
 
         public String getUrl() {
             return url;

@@ -48,7 +48,7 @@ import static java.time.ZoneId.systemDefault;
  * An implementation of Spring Boot's AuditEventRepository.
  */
 @Repository
-@ConditionalOnProperty(prefix = "ixortalk.audit", name = "enabled",havingValue = "true")
+@ConditionalOnProperty(prefix = "ixortalk.audit-log", name = "enabled",havingValue = "true")
 public class CustomAuditEventRepository implements AuditEventRepository {
 
     private static final String AUTHORIZATION_FAILURE = "AUTHORIZATION_FAILURE";
