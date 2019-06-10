@@ -25,8 +25,14 @@
 server:
   context-path: /uaa
 
-ixortalk:
+security:
+    oauth2:
+        resource:
+            user-info-uri: http://localhost:65002/user
+        client:
+            grant-type: client_credentials
 
+ixortalk:
   server:
     authserver:
         context-path: ${server.context-path}

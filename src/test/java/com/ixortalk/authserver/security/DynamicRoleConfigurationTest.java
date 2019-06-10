@@ -24,25 +24,17 @@
 package com.ixortalk.authserver.security;
 
 
-import java.util.List;
-
-import javax.inject.Inject;
-
-import com.ixortalk.authserver.AuthserverApp;
 import com.ixortalk.authserver.domain.Authority;
 import com.ixortalk.authserver.repository.AuthorityRepository;
-import com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer;
+import com.ixortalk.authserver.web.rest.AbstractSpringIntegrationTest;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import javax.inject.Inject;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = {AuthserverApp.class, OAuth2EmbeddedTestServer.class}, webEnvironment = RANDOM_PORT)
-public class DynamicRoleConfigurationTest {
+public class DynamicRoleConfigurationTest extends AbstractSpringIntegrationTest {
 
     @Inject
     private AuthorityRepository authorityRepository;

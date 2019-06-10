@@ -59,11 +59,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Test class for the AuditResource REST controller.
  *
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = AuthserverApp.class)
-@WebAppConfiguration
 @Transactional
-public class AuditResourceIntTest {
+public class AuditResourceIntTest extends AbstractSpringIntegrationTest {
 
     private static final String SAMPLE_PRINCIPAL = "SAMPLE_PRINCIPAL";
     private static final String SAMPLE_TYPE = "SAMPLE_TYPE";

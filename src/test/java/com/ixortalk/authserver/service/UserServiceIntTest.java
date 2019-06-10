@@ -23,22 +23,17 @@
  */
 package com.ixortalk.authserver.service;
 
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import javax.inject.Inject;
-
-import com.ixortalk.authserver.AuthserverApp;
 import com.ixortalk.authserver.domain.User;
 import com.ixortalk.authserver.repository.UserRepository;
 import com.ixortalk.authserver.service.util.RandomUtil;
+import com.ixortalk.authserver.web.rest.AbstractSpringIntegrationTest;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.inject.Inject;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,11 +42,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @see UserService
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = AuthserverApp.class)
-@WebAppConfiguration
 @Transactional
-public class UserServiceIntTest {
+public class UserServiceIntTest extends AbstractSpringIntegrationTest {
 
     @Inject
     private UserRepository userRepository;
