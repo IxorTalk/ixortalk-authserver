@@ -23,7 +23,7 @@
 #
 
 server:
-  context-path: /uaa
+  context-path: /uaa-thirdparty
 
 security:
     oauth2:

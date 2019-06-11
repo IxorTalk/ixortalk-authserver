@@ -48,7 +48,7 @@ public class LogoutWithoutParameter_IntegrationTest extends AbstractSpringIntegr
                 .statusCode(HTTP_MOVED_TEMP)
                 .extract().header("Location");
 
-        assertThat(location).endsWith("/uaa"+ixorTalkProperties.getLogout().getDefaultRedirectUri());
+        assertThat(location).endsWith("/uaa-thirdparty"+ixorTalkProperties.getLogout().getDefaultRedirectUri());
     }
 }
 

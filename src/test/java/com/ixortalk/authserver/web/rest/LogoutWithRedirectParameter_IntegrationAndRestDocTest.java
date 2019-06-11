@@ -104,7 +104,7 @@ public class LogoutWithRedirectParameter_IntegrationAndRestDocTest extends Abstr
                 .statusCode(HTTP_MOVED_TEMP)
                 .extract().header("Location");
 
-        assertThat(location).endsWith("/uaa"+ixorTalkProperties.getLogout().getDefaultRedirectUri());
+        assertThat(location).endsWith("/uaa-thirdparty"+ixorTalkProperties.getLogout().getDefaultRedirectUri());
     }
 
     @Test
@@ -119,7 +119,7 @@ public class LogoutWithRedirectParameter_IntegrationAndRestDocTest extends Abstr
                 .statusCode(HTTP_MOVED_TEMP)
                 .extract().header("Location");
 
-        assertThat(location).endsWith("/uaa"+ixorTalkProperties.getLogout().getDefaultRedirectUri());
+        assertThat(location).endsWith("/uaa-thirdparty"+ixorTalkProperties.getLogout().getDefaultRedirectUri());
     }
 }
 

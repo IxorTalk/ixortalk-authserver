@@ -96,7 +96,7 @@
 			                        </div>
 			                        <button type="submit" class="btn">Sign in!</button>
                                     <p style="margin: auto; text-align: center; margin-top:10px">
-                                        <a href="/uaa/#/reset/request"> Forgot your password ?</a>
+                                        <a href="/uaa-thirdparty/#/reset/request"> Forgot your password ?</a>
                                     </p>
 			                    </form>
 		                    </div>
