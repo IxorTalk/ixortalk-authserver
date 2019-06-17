@@ -23,7 +23,6 @@
  */
 package com.ixortalk.authserver.web.rest;
 
-import com.ixortalk.authserver.AuthserverApp;
 import com.ixortalk.authserver.domain.Authority;
 import com.ixortalk.authserver.domain.User;
 import com.ixortalk.authserver.repository.UserRepository;
@@ -37,14 +36,10 @@ import com.ixortalk.authserver.web.rest.dto.UserDTO;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -57,21 +52,23 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class for the AccountResource REST controller.
  *
  * @see UserService
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = AuthserverApp.class)
-@WebAppConfiguration
-public class AccountResourceIntTest {
+public class AccountResourceIntTest extends AbstractSpringIntegrationTest {
 
     @Inject
     private UserRepository userRepository;

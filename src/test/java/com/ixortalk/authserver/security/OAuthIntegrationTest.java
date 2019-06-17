@@ -23,48 +23,22 @@
  */
 package com.ixortalk.authserver.security;
 
-import javax.inject.Inject;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ixortalk.authserver.AuthserverApp;
-import com.jayway.restassured.RestAssured;
-import org.junit.Before;
+import com.ixortalk.authserver.web.rest.AbstractSpringIntegrationTest;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.context.embedded.LocalServerPort;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static com.ixortalk.test.oauth2.OAuth2TestTokens.getAccessToken;
+import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
+import static com.ixortalk.test.oauth2.OAuth2TestTokens.userToken;
 import static com.jayway.restassured.RestAssured.given;
-import static com.jayway.restassured.config.ObjectMapperConfig.objectMapperConfig;
-import static com.jayway.restassured.config.RestAssuredConfig.config;
 import static com.jayway.restassured.http.ContentType.JSON;
 import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
 import static java.net.HttpURLConnection.HTTP_OK;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = AuthserverApp.class, webEnvironment = RANDOM_PORT)
-public class OAuthIntegrationTest {
-
-    @LocalServerPort
-    private int port;
-
-    @Inject
-    private ObjectMapper objectMapper;
-
-    @Before
-    public void before() {
-        RestAssured.port = port;
-        RestAssured.basePath = "/";
-        RestAssured.config = config().objectMapperConfig(objectMapperConfig().jackson2ObjectMapperFactory((cls, charset) -> objectMapper));
-    }
+public class OAuthIntegrationTest extends AbstractSpringIntegrationTest {
 
     @Test
     public void adminClientId_AdminSecured() {
         given()
-            .auth().oauth2(adminToken())
+            .auth().oauth2(adminToken().getValue())
             .accept(JSON)
             .contentType(JSON)
             .when()
@@ -76,7 +50,7 @@ public class OAuthIntegrationTest {
     @Test
     public void userClientId_AdminSecured() {
         given()
-            .auth().oauth2(userToken())
+            .auth().oauth2(userToken().getValue())
             .accept(JSON)
             .contentType(JSON)
             .when()
@@ -88,32 +62,24 @@ public class OAuthIntegrationTest {
     @Test
     public void adminClientId_UserSecured() {
         given()
-            .auth().oauth2(adminToken())
+            .auth().oauth2(adminToken().getValue())
             .accept(JSON)
             .contentType(JSON)
             .when()
             .get("/test-resource/userSecured")
             .then()
-            .statusCode(HTTP_OK);
+            .statusCode(HTTP_FORBIDDEN);
     }
 
     @Test
     public void userClientId_UserSecured() {
         given()
-            .auth().oauth2(userToken())
+            .auth().oauth2(userToken().getValue())
             .accept(JSON)
             .contentType(JSON)
             .when()
             .get("/test-resource/userSecured")
             .then()
             .statusCode(HTTP_OK);
-    }
-
-    private static String adminToken() {
-        return getAccessToken("testAdminClientId", "testAdminClientSecret").getValue();
-    }
-
-    private static String userToken() {
-        return getAccessToken("testUserClientId", "testUserClientSecret").getValue();
     }
 }

@@ -24,7 +24,6 @@
 package com.ixortalk.authserver.config;
 
 
-import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -38,19 +37,18 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
-
 
 import javax.inject.Inject;
 
-import static com.ixortalk.authserver.config.OAuth2ServerConfiguration.LOGIN_CONFIG_ORDER;
+import static com.ixortalk.authserver.config.ResourceServersConfiguration.ENABLE_RESOURCE_SERVER_ORDER;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
-@Order(LOGIN_CONFIG_ORDER + 2)
+@Order(ENABLE_RESOURCE_SERVER_ORDER + 1)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Inject
