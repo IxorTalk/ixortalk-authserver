@@ -45,8 +45,14 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.view.RedirectView;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Set;
@@ -85,7 +91,26 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 
         endpoints
             .tokenStore(tokenStore())
-            .authenticationManager(authenticationManager);
+            .authenticationManager(authenticationManager)
+            // See https://github.com/spring-projects/spring-security-oauth/issues/140
+            .addInterceptor(new HandlerInterceptorAdapter() {
+                @Override
+                public void postHandle(HttpServletRequest request,
+                                       HttpServletResponse response, Object handler,
+                                       ModelAndView modelAndView) throws Exception {
+                    if (modelAndView != null
+                        && modelAndView.getView() instanceof RedirectView) {
+                        RedirectView redirect = (RedirectView) modelAndView.getView();
+                        String url = redirect.getUrl();
+                        if (url.contains("code=") || url.contains("error=")) {
+                            HttpSession session = request.getSession(false);
+                            if (session != null) {
+                                session.invalidate();
+                            }
+                        }
+                    }
+                }
+            });
     }
 
     @Override
